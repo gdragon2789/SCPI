@@ -1,0 +1,37 @@
+# Virtual instrument software architecture
+from SCPI.controller.TCPIP import TCPIP_Controller
+from SCPI.controller.SERIAL import SERIAL_Controller
+from SCPI.controller.PYVISA import PYVISA_Controller
+
+class VISA_INSTRUMENT:
+    def __init__(self, visa_port=None, connection_type=None):
+        self.visa_port = visa_port
+        self.connection_type = connection_type
+        self.controller = None
+        self.__connect()
+
+    def __connect(self):
+        if self.connection_type == "USB":
+            self.controller = PYVISA_Controller(visa_port=self.visa_port, debug=True)
+        elif self.connection_type == "TCP/IP":
+            self.controller = TCPIP_Controller(ip_address=self.visa_port)
+            self.__cls()
+        elif self.connection_type == "Serial":
+            self.controller = SERIAL_Controller(port=self.visa_port)
+            self.__cls()
+
+    # IEEE 488.2 CC
+    def __cls(self):
+        self.controller.cls()
+
+    def rst(self):
+        self.controller.rst()
+
+    def close(self):
+        self.controller.close()
+
+    def write(self, command: str) -> None:
+        self.controller.write(command)
+
+    def query(self, command: str) -> str:
+        return self.controller.query(command)

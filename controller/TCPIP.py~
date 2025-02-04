@@ -1,0 +1,74 @@
+import socket
+
+class TCPIP_Controller:
+    def __init__(self,
+                 ip_address: str,
+                 tcp_ports: list[int] | None = None,
+                 timeout: float = 1,
+                 buffer_size: int = 4096,
+                 debug=False) -> None:
+        """
+        Initializes the TCPIP_Controller class for communicating with SCPI instruments over TCP/IP.
+        :param ip_address:
+        :param tcp_ports: List of ports to try.
+        :param timeout:
+        :param buffer_size:
+        :param debug:
+        """
+
+        if tcp_ports is None:
+            tcp_ports = [5025, 5555]  # Default port list
+
+        self.buffer_size = buffer_size
+        self.debug = debug
+        self._connection = None
+        self._idn = None
+
+        for port in tcp_ports:
+            try:
+                self._connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._connection.settimeout(timeout)
+                self._connection.connect((ip_address, port))
+                idn = self.query("*IDN?")
+                if idn:
+                    self._idn = idn
+                    if self.debug:
+                        print(f"Connected to {idn} on port {port}.")
+                    break
+            except (socket.timeout, socket.error) as e:
+                if self.debug:
+                    print(f"Failed to connect on port {port}: {e}")
+                self._connection = None
+        # else:
+        #     raise ConnectionError("Unable to connect to the instrument on any provided port.")
+
+    def write(self, command: str) -> None:
+        """Sends an SCPI command to the instrument."""
+        command += "\n"  # Add termination
+        self._connection.sendall(command.encode())
+
+    def query(self, command: str) -> str:
+        """Sends an SCPI command and reads the response."""
+        self.write(command)
+        recv_bytes = bytes()
+        while True:
+            recv_bytes += self._connection.recv(self.buffer_size)
+            if recv_bytes.endswith(b"\n"):
+                return recv_bytes.decode().strip()
+    def cls(self) -> None:
+        self.write("*CLS")
+
+    def rst(self):
+        self.write("*RST")
+
+    def opc(self) -> bool:
+        return self.query("*OPC?").lower() == "1"
+
+    def close(self) -> None:
+        """Closes TCP/IP connection."""
+        if self._connection:
+            self._connection.close()
+
+    @property
+    def idn(self):
+        return self._idn

@@ -1,0 +1,489 @@
+from SCPI.api.__init__ import *
+from SCPI.controller.__init__ import *
+
+
+class USER_SETUP(Enum):
+    """
+    user-saved settings that are stored in setup memory.
+    """
+    SETUP_0 = 0
+    SETUP_1 = 1
+    SETUP_2 = 2
+    SETUP_3 = 3
+    SETUP_4 = 4
+
+
+class FUNCTION(Enum):
+    """
+    Functions available on the instrument
+    """
+    VOLT_DC = "VOLTage:DC"
+    VOLT_AC = "VOLTage:AC"
+    CURR_DC = "CURRent:DC"
+    CURR_AC = "CURRent:AC"
+    RES = "RESistance"
+    FRES = "FRESistance"
+    DIOD = "DIODe"
+    CAP = "CAPacitance"
+    TEMP = "TEMPerature"
+    CONT = "CONTinuity"
+    FREQ = "FREQuency:VOLTage"
+    PER = "PERiod:VOLTage"
+    VOLT_RAT = "VOLTage:DC:RATio"
+
+
+class BUFFER_ELEMENTS(Enum):
+    """
+    When specifying buffer elements, you can:
+        • Specify buffer elements in any order.
+        • Include up to 14 elements in a single list. You can repeat elements as long as the number of
+        elements in the list is less than 14.
+        • Use a comma to delineate multiple elements for a data point.
+    """
+    CHANnel = "CHANnel"
+    DATE = "DATE"
+    EXTRa = "EXTRa"
+    EXTRAFORMatted = "EXTRAFORMatted"
+    EXTRAUNIT = "EXTRAUNIT"
+    FORMatted: "FORMatted"
+    FRACtional = "FRACtional"
+    READing = "READing"
+    RELative = "RELative"
+    SEConds = "SEConds"
+    STATus = "STATus"
+    TIME = "TIME"
+    TSTamp = "TSTamp"
+    UNIT = "UNIT"
+
+
+class ROOT(Enum):
+    SET_RCL = "*RCL {setup}"
+    SET_SAV = "*SAV {setup}"
+    GET_FETCh = ":FETCh? {bufferName}, {bufferElements}"
+    GET_MEASURE = ":MEASure? {bufferName}, {bufferElements"
+    GET_MEASURE_WITH = ":MEASure:{function}? {bufferName}, {bufferElements}"
+    GET_MEASURE_DIGITIZE = ":MEASure:DIGitize? {bufferName}, {bufferElements}"
+    GET_MEASURE_DIGITIZE_WITH = ":MEASure:DIGitize:{function}? {bufferName}, {bufferElements}"
+    GET_READ = ":READ? {bufferName}, {bufferElements}"
+    GET_READ_DIGITIZE = ":READ:DIGitize? {bufferName}, {bufferElements}"
+
+
+class CALCulate(Enum):
+    """
+    The commands in this subsystem configure and control the math and limit operations
+    """
+    # Limit test sub system
+    SET_LIMIt_STATe = ":CALCulate2:{function}:LIMit{Y}:STATe {state}, {@<channelList>}"
+    GET_LIMIt_STATe = ":CALCulate2:{function}:LIMit{Y}:STATe? {@<channelList>}"
+    SET_AUDible = ":CALCulate2:{function}:LIMit{Y}:AUDible {state}, {@<channelList>}"
+    GET_AUDible = ":CALCulate2:{function}:LIMit{Y}:AUDible? {@<channelList>}"
+    SET_CLEAr_AUTO = ":CALCulate2:{function}:CLEar:AUTO {state}, {@<channelList>}"
+    GET_CLEAr_AUTO = ":CALCulate2:{function}:CLEar:AUTO? {@<channelList>}"
+    SET_CLEAr_RESUtls = ":CALCulate2:{function}:LIMit{Y}:CLEar:IMMediate"
+    GET_LIMIt_RESULts = ":CALCulate2:{function}:LIMIT{Y}:FAIL? {@<channelList>}"
+    SET_LOWEr_LIMIt = ":CALCulate2:{function}:LIMit{Y}:LOWer:DATA {n}, {@<channelList>}"
+    GET_LOWEr_LIMIt = ":CALCulate2:{function}:LIMit{Y}:LOWer:DATA? {@<channelList>}"
+    SET_UPPER_LIMIt = ":CALCulate2:{function}:LIMit{Y}:UPPer:DATA {n}, {@<channelList>}"
+    GET_UPPER_LIMIt = ":CALCulate2:{function}:LIMit{Y}:UPPer:DATA? {@<channelList>}"
+
+    # Math sub system
+    SET_MATH_STATe = ":CALCulate1:{function}:STATe {state}, {@<channelList>}"
+    GET_MATH_STATe = ":CALCulate1:{function}:STATe? {@<channelList>}"
+    SET_MATH_FORMat = ":CALCulate1:{function}:FORMat {state}, {@<channelList>}"
+    GET_MATH_FORMat = ":CALCulate1:{function}:FORMat? {@<channelList>}"
+    SET_MATH_MBFactor = ":CALCulate1:{function}:MBFACTOR {n}, {@<channelList>}"
+    GET_MATH_MBFactor = ":CALCulate1:{function}:MBFACTOR? {@<channelList>}"
+    SET_MATH_MMFactor = ":CALCulate1:{function}:MMFACTOR {value}, {@<channelList>}"
+    GET_MATH_MMFactor = ":CALCulate1:{function}:MMFACTOR? {@<channelList>}"
+    SET_MATH_PERCent = ":CALCulate1:{function}:PERCent {value}, {@<channelList>}"
+    GET_MATH_PERCent = ":CALCulate1:{function}:PERCent? {@<channelList>}"
+
+
+class DIGital(Enum):
+    """
+    This command sets the mode of the digital I/O line to be a digital line, trigger line, or synchronous line and sets
+    the line to be input, output, or open-drain.
+    """
+    SET_DIGItal_LINE_MODE = ":DIGital:LINE{n}:MODE {lineType}, {lineDirection}"
+    GET_DIGItal_LINE_MODE = ":DIGital:LINE{n}:MODE?"
+    SET_DIGItal_LINE_STATe = ":DIGital:LINE{n}:STATe {state}"
+    GET_DIGItal_LINE_STATe = ":DIGital:LINE{n}:STATe?"
+    GET_DIGItal_READ = ":DIGital:READ?"
+    SET_DIGItal_WRITE = ":DIGital:WRITE {n}"
+
+
+class DISPlay(Enum):
+    """
+    This subsystem contains commands that control the front-panel display.
+    """
+    SET_DISPlay_BUFFer_ACTive = ":DISPlay:BUFFer:ACTive {bufferName}"
+    GET_DISPlay_BUFFer_ACTive = ":DISPlay:BUFFer:ACTive?"
+    SET_DISPlay_BUFFer_CLEar = ":DISPlay:CLEar"
+    SET_DISPlay_DIGIits = ":DISPlay:{function}:DIGits {value}, {@<channelList>}"
+    GET_DISPlay_DIGIits = ":DISPlay:{function}:DIGits? {@<channelList>}"
+    SET_DISPlay_LIGHt_STATe = ":DISPlay:LIGHt:STATe {brightness}"
+    GET_DISPlay_LIGHt_STATe = ":DISPlay:LIGHt:STATe?"
+    SET_DISPlay_READing_FORMat = ":DISPlay:READing:FORMat {format}"
+    GET_DISPlay_READing_FORMat = ":DISPlay:READing:FORMat?"
+    SET_DISPlay_SCReen = ":DISPlay:SCReen {screenName}"
+    SET_DISPlay_USER_TEXt = ":DISPlay:USER{n}:TEXT:DATA {textMessage}"
+    SET_DISPlay_WATCh_CHANnels = ":DISPlay:WATCh:CHANnels (@<channelList>)"
+    GET_DISPlay_WATCh_CHANnels = ":DISPlay:WATCh:CHANnels?"
+
+
+class FORMat(Enum):
+    """
+    The commands for this subsystem select the data format that is used to transfer instrument readings
+    over the remote interface.
+    """
+    SET_FORMat_ASCii_PRECision = ":FORMat:ASCii:PRECision {value}"
+    GET_FORMat_ASCii_PRECision = ":FORMat:ASCii:PRECision?"
+    SET_FORMat_BORDer = ":FORMat:BORDer {name}"
+    GET_FORMat_BORDer = ":FORMat:BORDer?"
+    SET_FORMat_DATA = ":FORMat:DATA {type}"
+    GET_FORMat_DATA = ":FORMat:DATA?"
+
+
+class ROUTe(Enum):
+    """
+    The ROUTe subsystem contains commands to open, close, and set up scans for channels. It also
+    contains a command you can use to verify whether the front or rear terminals are used for
+    measurements.
+    """
+    SET_ABORt = ":ABORt"
+    SET_INITiate_IMMediate = ":INITiate:IMMediate"
+    SET_ROUTe_CHANnel_CLOSe = ":ROUTe:CHANnel:CLOSe {@<channelList>}"
+    GET_ROUTe_CHANnel_CLOSe = ":ROUTe:CHANnel:CLOSe?"
+    GET_ROUTe_CHANnel_CLOSe_COUNt = ":ROUTe:CHANnel:CLOSe:COUNt? {@<channelList>}"
+    SET_ROUTe_CHANnel_DELay = ":ROUTe:CHANnel:DELay {value}, {@<channelList>}"
+    GET_ROUTe_CHANnel_DELay = ":ROUTe:CHANnel:DELay? {@<channelList>}"
+    SET_ROUTe_CHANnel_LABel = ":ROUTe:CHANnel:LABel {label}, {@<channelList>}"
+    GET_ROUTe_CHANnel_LABel = ":ROUTe:CHANnel:LABel? {@<channelList>}"
+    SET_ROUTe_CHANnel_MULTiple_CLOSe = ":ROUTe:CHANnel:MULTiple:CLOSe {@<channelList>}"
+    GET_ROUTe_CHANnel_MULTiple_CLOSe = ":ROUTe:CHANnel:MULTiple:CLOSe?"
+    SET_ROUTe_CHANnel_MULTiple_OPEN = ":ROUTe:CHANnel:MULTiple:OPEN {@<channelList>}"
+    SET_ROUTe_CHANnel_OPEN = ":ROUTe:CHANnel:OPEN {@<channelList>}"
+    SET_ROUTe_CHANnel_OPEN_ALL = ":ROUTe:CHANnel:OPEN:ALL"
+    GET_ROUTe_CHANnel_STATe = ":ROUTe:CHANnel:STATe? {@<channelList>}"
+    GET_ROUTe_CHANnel_TYPE = ":ROUTe:CHANnel:TYPE? {@<channelList>}"
+    SET_ROUTe_SCAN_ADD = ":ROUTe:SCAN:ADD {@<channelList>}, {configurationList}, {index}"
+    SET_ROUTe_SCAN_ADD_SINGle = ":ROUTe:SCAN:ADD:SINGle {@<channelList>}, {configurationList}, {index}"
+    SET_ROUTe_SCAN_ALARm = ":ROUTe:SCAN:ALARm {n}"
+    GET_ROUTe_SCAN_ALARm = ":ROUTe:SCAN:ALARm?"
+    SET_ROUTe_SCAN_BUFFer = ":ROUTe:SCAN:BUFFer {bufferName}"
+    GET_ROUTe_SCAN_BUFFer = ":ROUTe:SCAN:BUFFer?"
+    SET_ROUTe_SCAN_BYPass = ":ROUTe:SCAN:BYPass {bypass}"
+    GET_ROUTe_SCAN_BYPass = ":ROUTe:SCAN:BYPass?"
+    SET_ROUTe_SCAN_CHANnel_STIMulus = ":ROUTe:SCAN:CHANnel:STIMulus {eventID}"
+    GET_ROUTe_SCAN_CHANnel_STIMulus = ":ROUTe:SCAN:CHANnel:STIMulus?"
+    SET_ROUTe_SCAN_COUNt_SCAN = ":ROUTe:SCAN:COUNt:SCAN {scanCount}"
+    GET_ROUTe_SCAN_COUNt_SCAN = ":ROUTe:SCAN:COUNt:SCAN?"
+    GET_ROUTe_SCAN_COUNt_STEP = ":ROUTe:SCAN:COUNt:STEP?"
+    SET_ROUTe_SCAN_CREate = ":ROUTe:SCAN:CREate {@<channelList>}, {configurationList}, {index}"
+    GET_ROUTe_SCAN_CREate = ":ROUTe:SCAN:CREate?"
+    SET_ROUTe_SCAN_EXPOrt = ":ROUTe:SCAN:EXPort /usb1/{filename}, {when}, {what}"
+    SET_ROUTe_SCAN_INTerval = ":ROUTe:SCAN:INTerval {interval}"
+    GET_ROUTe_SCAN_INTerval = ":ROUTe:SCAN:INTerval?"
+    SET_ROUTe_SCAN_LEARn_LIMIit = "ROUTe:SCAN:LEARn:LIMits {window}, {iterations}"
+    SET_ROUTe_SCAN_MEASure_STIMulus = ":ROUTe:SCAN:MEASure:STIMulus {eventID}"
+    GET_ROUTe_SCAN_MEASure_STIMulus = ":ROUTe:SCAN:MEASure:STIMulus?"
+    SET_ROUTe_SCAN_MEASure_INTerval = ":ROUTe:SCAN:MEASure:INTerval {time}"
+    GET_ROUTe_SCAN_MEASure_INTerval = ":ROUTe:SCAN:MEASure:INTerval?"
+    SET_ROUTe_SCAN_MODE = ":ROUTe:SCAN:MODE {mode}"
+    GET_ROUTe_SCAN_MODE = ":ROUTe:SCAN:MODE?"
+    SET_ROUTe_SCAN_MONitor_CHANnel = ":ROUTe:SCAN:MONitor:CHANnel {@<channel>}"
+    GET_ROUTe_SCAN_MOoNitor_CHANnel = ":ROUTe:SCAN:MONitor:CHANnel?"
+    SET_ROUTe_SCAN_MONitor_LIMit_LOWer_DATA = ":ROUTe:SCAN:MONitor:LIMit:LOWer:DATA {n}"
+    GET_ROUTe_SCAN_MONitor_LIMit_LOWer_DATA = ":ROUTe:SCAN:MONitor:LIMit:LOWer:DATA?"
+    SET_ROUTe_SCAN_MONitor_LIMit_UPPER_DATA = ":ROUTe:SCAN:MONitor:LIMit:UPPER:DATA {n}"
+    GET_ROUTe_SCAN_MONitor_LIMit_UPPER_DATA = ":ROUTe:SCAN:MONitor:LIMit:UPPER:DATA?"
+    SET_ROUTe_SCAN_MONitor_MODE = ":ROUTe:SCAN:MONitor:MODE {mode}"
+    GET_ROUTe_SCAN_MONitor_MODE = ":ROUTe:SCAN:MONitor:MODE?"
+    SET_ROUTe_SCAN_RESTart = ":ROUTe:SCAN:REStart {n}"
+    GET_ROUTe_SCAN_RESTart = ":ROUTe:SCAN:REStart?"
+    SET_ROUTe_SCAN_STARt_STIMulus = ":ROUTe:SCAN:STARt:STIMulus {eventID}"
+    GET_ROUTe_SCAN_STARt_STIMulus = ":ROUTe:SCAN:STARt:STIMulus?"
+    GET_ROUTe_SCAN_STATe = ":ROUTe:SCAN:STATe?"
+    GET_ROUTe_TERMinals = ":ROUTe:TERMinals?"
+
+
+class SCRipt(Enum):
+    """
+    The SCRipt subsystem controls macro or instrument setup scripts.
+    """
+    SET_SCRIpt_RUN = ":SCRipt:RUN {scriptName}"
+
+
+class SENSe1(Enum):
+    """
+    The SENSe1 subsystem commands configure and control the measurement functions of the
+    instrument.
+    Many of these commands are set for a specific function. For example, you can program a range
+    setting for each function. The settings are saved with that function.
+    """
+    SET_SENSe1_APERture = ":SENSe1:{function}:APERture {n}, {@<channelList>}"
+    GET_SENSe1_APERture = ":SENSe1:{function}:APERture? {@<channelList>}"
+    SET_SENSe1_ATRigger_EDGE_LEVel = ":SENSe1:{function}:ATRigger:EDGE:LEVel {setting}, {@<channelList>}"
+    GET_SENSe1_ATRigger_EDGE_LEVel = ":SENSe1:{function}:ATRigger:EDGE:LEVel? {@<channelList>}"
+    SET_SENSe1_ATRigger_EDGE_SLOpe = ":SENSe1:{function}:ATRigger:EDGE:SLOpe {setting}, {@<channelList>}"
+    GET_SENSe1_ATRigger_EDGE_SLOpe = ":SENSe1:{function}:ATRigger:EDGE:SLOpe? {@<channelList>}"
+    SET_SENSe1_ATRigger_MODE = ":SENSe1:{function}:ATRigger:MODE {setting}, {@<channelList>}"
+    GET_SENSe1_ATRigger_MODE = ":SENSe1:{function}:ATRigger:MODE? {@<channelList>}"
+    SET_SENSe1_ATRigger_WINDow_DIRection = ":SENSe1:{function}:ATRigger:WINDow:DIRection {setting}, {@<channelList>}"
+    GET_SENSe1_ATRigger_WINDow_DIRection = ":SENSe1:{function}:ATRigger:WINDow:DIRection? {@<channelList>}"
+    SET_SENSe1_ATRigger_WINDow_LEVel_HIGH = ":SENSe1:{function}:ATRigger:WINDow:LEVel:HIGH {setting}, {@<channelList>}"
+    GET_SENSe1_ATRigger_WINDow_LEVel_HIGH = ":SENSe1:{function}:ATRigger:WINDow:LEVel:HIGH? {@<channelList>}"
+    SET_SENSe1_ATRigger_WINDow_LEVel_LOW = ":SENSe1:{function}:ATRigger:WINDow:LEVel:LOW {setting}, {@<channelList>}"
+    GET_SENSe1_ATRigger_WINDow_LEVel_LOW = ":SENSe1:{function}:ATRigger:WINDow:LEVel:LOW? {@<channelList>}"
+    SET_SENSe1_AVERage_COUNt = ":SENSe1:{function}:AVERage:COUNt {n}, {@<channelList>}"
+    GET_SENSe1_AVERage_COUNt = ":SENSe1:{function}:AVERage:COUNt? {@<channelList>}"
+    SET_SENSe1_AVERage_STATe = ":SENSe1:{function}:AVERage:STATe {state}, {@<channelList>}"
+    GET_SENSe1_AVERage_STATe = ":SENSe1:{function}:AVERage:STATe? {@<channelList>}"
+    SET_SENSe1_AVERage_TCONtrol = ":SENSe1:{function}:AVERage:TCONtrol {type}, {@<channelList>}"
+    GET_SENSe1_AVERage_TCONtrol = ":SENSe1:{function}:AVERage:TCONtrol? {@<channelList>}"
+    SET_SENSe1_AVERage_WINDow = ":SENSe1:{function}:AVERage:WINDow {n}, {@<channelList>}"
+    GET_SENSe1_AVERage_WINDow = ":SENSe1:{function}:AVERage:WINDow? {@<channelList>}"
+    SET_SENSe1_AZERo_STATe = ":SENSe1:{function}:AZERo:STATe {state}, {@<channelList>}"
+    GET_SENSe1_AZERo_STATe = ":SENSe1:{function}:AZERo:STATe? {@<channelList>}"
+    SET_SENSe1_BIAS_LEVel = ":SENSe1:{function}:BIAS:LEVel {n}, {@<channelList>}"
+    GET_SENSe1_BIAS_LEVel = ":SENSe1:{function}:BIAS:LEVel? {@<channelList>}"
+    SET_SENSe1_DB_REFerence = ":SENSe1:{function}:DB:REFERence {n}, {@<channelList>}"
+    GET_SENSe1_DB_REFerence = ":SENSe1:{function}:DB:REFERence? {@<channelList>}"
+    SET_SENSe1_DBM_REFerence = ":SENSe1:{function}:DBM:REFERence {n}, {@<channelList>}"
+    GET_SENSe1_DBM_REFerence = ":SENSe1:{function}:DBM:REFERence? {@<channelList>}"
+    SET_SENSe1_DELay_AUTO = ":SENSe1:{function}:DELay:AUTO {state}, {@<channelList>}"
+    GET_SENSe1_DELay_AUTO = ":SENSe1:{function}:DELay:AUTO? {@<channelList>}"
+    SET_SENSe1_DELay_USER = ":SENSe1:{function}:DELay:USER {delayTime}, {@<channelList>}"
+    GET_SENSe1_DELay_USER = ":SENSe1:{function}:DELay:USER? {@<channelList>}"
+    SET_SENSe1_DETector_BANDwidth = ":SENSe1:{function}:DETector:BANDwidth {n}, {@<channelList>}"
+    GET_SENSe1_DETector_BANDwidth = ":SENSe1:{function}:DETector:BANDwidth? {@<channelList>}"
+    SET_SENSe1_INPutimpedance = ":SENSe1:{function}:INPutimpedance {n}, {@<channelList>}"
+    GET_SENSe1_INPutimpedance = ":SENSe1:{function}:INPutimpedance? {@<channelList>}"
+    SET_SENSe1_LINE_SYNC = ":SENSe1:{function}:LINE:SYNC {state}, {@<channelList>}"
+    GET_SENSe1_LINE_SYNC = ":SENSe1:{function}:LINE:SYNC? {@<channelList>}"
+    SET_SENSe1_NPLCycle = ":SENSe1:{function}:NPLCycle {n}, {@<channelList>}"
+    GET_SENSe1_NPLCycle = ":SENSe1:{function}:NPLCycle? {@<channelList>}"
+    SET_SENSe1_OCOMpensated = ":SENSe1:{function}:OCOMpensated {state}, {@<channelList>}"
+    GET_SENSe1_OCOMpensated = ":SENSe1:{function}:OCOMpensated? {@<channelList>}"
+    SET_SENSe1_ODETector = ":SENSe1:{function}:ODETector {state}, {@<channelList>}"
+    GET_SENSe1_ODETector = ":SENSe1:{function}:ODETector? {@<channelList>}"
+    SET_SENSe1_RANGe_AUTO = ":SENSe1:{function}:RANGe:AUTO {state}, {@<channelList>}"
+    GET_SENSe1_RANGe_AUTO = ":SENSe1:{function}:RANGe:AUTO? {@<channelList>}"
+    SET_SENSe1_RANGe_UPPer = ":SENSe1:{function}:RANGe:UPPer {n}, {@<channelList>}"
+    GET_SENSe1_RANGe_UPPer = ":SENSe1:{function}:RANGe:UPPer? {@<channelList>}"
+    SET_SENSe1_RELative = ":SENSe1:{function}:RELative {state}, {@<channelList>}"
+    GET_SENSe1_RELative = ":SENSe1:{function}:RELative? {@<channelList>}"
+    SET_SENSe1_RELative_ACQuire = ":SENSe1:{function}:RELative:ACQuire"
+    SET_SENSe1_RELative_METHod = ":SENSe1:{function}:RELative:METHod {n}, {@<channelList>}"
+    GET_SENSe1_RELative_METHod = ":SENSe1:{function}:RELative:METHod? {@<channelList>}"
+    SET_SENSe1_RELative_STATe = ":SENSe1:{function}:RELative:STATe {state}, {@<channelList>}"
+    GET_SENSe1_RELative_STATe = ":SENSe1:{function}:RELative:STATe? {@<channelList>}"
+    SET_SENSe1_RTD_ALPHa = ":SENSe1:{function}:RTD:ALPHa {n}, {@<channelList>}"
+    GET_SENSe1_RTD_ALPHa = ":SENSe1:{function}:RTD:ALPHa? {@<channelList>}"
+    SET_SENSe1_RTD_BETA = ":SENSe1:{function}:RTD:BETA {n}, {@<channelList>}"
+    GET_SENSe1_RTD_BETA = ":SENSe1:{function}:RTD:BETA? {@<channelList>}"
+    SET_SENSe1_RTD_DELTa = ":SENSe1:{function}:RTD:DELTa {n}, {@<channelList>}"
+    GET_SENSe1_RTD_DELTa = ":SENSe1:{function}:RTD:DELTa? {@<channelList>}"
+    SET_SENSe1_RTD_FOUR = ":SENSe1:{function}:RTD:FOUR {type}, {@<channelList>}"
+    GET_SENSe1_RTD_FOUR = ":SENSe1:{function}:RTD:FOUR? {@<channelList>}"
+    SET_SENSe1_RTD_THRee = ":SENSe1:{function}:RTD:THRee {type}, {@<channelList>}"
+    GET_SENSe1_RTD_THRee = ":SENSe1:{function}:RTD:THRee? {@<channelList>}"
+    SET_SENSe1_RTD_TWO = ":SENSe1:{function}:RTD:TWO {type}, {@<channelList>}"
+    GET_SENSe1_RTD_TWO = ":SENSe1:{function}:RTD:TWO? {@<channelList>}"
+    SET_SENSe1_RTD_ZERO = ":SENSe1:{function}:RTD:ZERO {n}, {@<channelList>}"
+    GET_SENSe1_RTD_ZERO = ":SENSe1:{function}:RTD:ZERO? {@<channelList>}"
+    SET_SENSe1_SRATe = ":SENSe1:{function}:SRATe {n}, {@<channelList>}"
+    GET_SENSe1_SRATe = ":SENSe1:{function}:SRATe? {@<channelList>}"
+    GET_SENSe1_SENSe_RANGe_AUTO = ":SENSe1:{function}:SENSe:RANGe:AUTO?"
+    GET_SENSe1_SENSe_RANGe_UPPer = ":SENSe1:{function}:SENSe:RANGe:UPPer? {@<channelList>}"
+    SET_SENSe1_TCouple_RJUNtion_SIMulated = ":SENSe1:{function}:TCouple:RJUNtion:SIMulated {tempValue}, {@<channelList>}"
+    GET_SENSe1_TCouple_RJUNtion_SIMulated = ":SENSe1:{function}:TCouple:RJUNtion:SIMulated? {@<channelList>}"
+    SET_SENSe1_TCouple_RJUNtion_RSELect = ":SENSe1:{function}:TCouple:RJUNtion:RSELect {type}, {@<channelList>}"
+    GET_SENSe1_TCouple_RJUNtion_RSELect = ":SENSe1:{function}:TCouple:RJUNtion:RSELect? {@<channelList>}"
+    SET_SENSe1_TCouple_TYPE = ":SENSe1:{function}:TCouple:TYPE {indentifier}, {@<channelList>}"
+    GET_SENSe1_TCouple_TYPE = ":SENSe1:{function}:TCouple:TYPE? {@<channelList>}"
+    SET_SENSe1_THERmistor = ":SENSe1:{function}:THERmistor {n}, {@<channelList>}"
+    GET_SENSe1_THERmistor = ":SENSe1:{function}:THERmistor? {@<channelList>}"
+    SET_SENSe1_THREshold_RANGe = ":SENSe1:{function}:THREshold:RANGe {n}, {@<channelList>}"
+    GET_SENSe1_THREshold_RANGe = ":SENSe1:{function}:THREshold:RANGe? {@<channelList>}"
+    SET_SENSe1_THREshold_RANGe_AUTO = ":SENSe1:{function}:THREshold:RANGe:AUTO {state}, {@<channelList>}"
+    GET_SENSe1_THREshold_RANGe_AUTO = ":SENSe1:{function}:THREshold:RANGe:AUTO? {@<channelList>}"
+    SET_SENSe1_TRANsducer = ":SENSe1:{function}:TRANsducer {type}, {@<channelList>}"
+    GET_SENSe1_TRANsducer = ":SENSe1:{function}:TRANsducer? {@<channelList>}"
+    SET_SENSe1_UNIT = ":SENSe1:{function}:UNIT {unitOfMeasure}, {@<channelList>}"
+    GET_SENSe1_UNIT = ":SENSe1:{function}:UNIT? {@<channelList>}"
+    SET_SENSe1_AZERo_ONCE = ":SENSe1:AZERo:ONCE"
+    GET_SENSe1_CONFiguration_LIST_CATalog = ":SENSe1:CONFiguration:LIST:CATalog?"
+    SET_SENSe1_CONFiguration_LIST_CREate = ":SENSe1:CONFiguration:LIST:CREate {name}"
+    SET_SENSe1_CONFiguration_LIST_DELEte = ":SENSe1:CONFiguration:LIST:DELEte {name}, {index}"
+    GET_SENSe1_CONFiguration_LIST_QUERy = ":SENSe1:CONFiguration:LIST:QUERY? {name}, {index}, {fieldSeparator}"
+    SET_SENSe1_CONFiguration_LIST_RECall = ":SENSe1:CONFiguration:LIST:RECall {name}, {index}"
+    GET_SENSe1_CONFiguration_LIST_SIZE = ":SENSe1:CONFiguration:LIST:SIZE? {name}"
+    SET_SENSe1_CONFiguration_LIST_STORe = ":SENSe1:CONFiguration:LIST:STORe {name}, {index}"
+    SET_SENSe1_COUNt = ":SENSe1:{function}:COUNt {n}, {@<channelList>}"
+    GET_SENSe1_COUNt = ":SENSe1:{function}:COUNt? {@<channelList>}"
+    SET_SENSe1_DIGitize_COUNt = ":SENSe1:{function}:DIGitize:COUNt {n}, {@<channelList>}"
+    GET_SENSe1_DIGitize_COUNt = ":SENSe1:{function}:DIGitize:COUNt? {@<channelList>}"
+    SET_SENSe1_DIGitize_FUNCtion_ON = ":SENSe1:{function}:DIGitize:FUNCtion:ON {function}, {@<channelList>}"
+    GET_SENSe1_DIGitize_FUNCtion_ON = ":SENSe1:{function}:DIGitize:FUNCtion:ON? {@<channelList>}"
+    SET_SENSe1_FUNCtion_ON = ":SENSe1:{function}:FUNCtion:ON {function}, {@<channelList>}"
+    GET_SENSe1_FUNCtion_ON = ":SENSe1:{function}:FUNCtion:ON? {@<channelList>}"
+
+
+class STATus(Enum):
+    pass
+
+
+class SYSTem(Enum):
+    pass
+
+
+class TRACe(Enum):
+    pass
+
+
+class TRIGger(Enum):
+    pass
+
+
+class DMM6500:
+    def __init__(self, visa_port=None, connection_type=None):
+        self.visa_port = visa_port
+        self.connection_type = connection_type
+        self.controller = None
+        self.__connect()
+
+    def __connect(self):
+        if self.connection_type == "USB":
+            pass
+        elif self.connection_type == "TCP/IP":
+            self.controller = TCPIP_Controller(ip_address=self.visa_port)
+            self.__cls()
+        elif self.connection_type == "Serial":
+            self.controller = SERIAL_Controller(port=self.visa_port)
+            self.__cls()
+
+    def __cls(self):
+        self.controller.write('*CLS')
+
+    def write(self, command: str) -> None:
+        self.controller.write(command)
+
+    def query(self, command: str) -> str:
+        return self.controller.query(command)
+
+    def fetch(self, buffer_name="defbuffer1"):
+        return self.controller.query(f':FETCh? "{buffer_name}"')
+
+    ROOT.RCL.value.format(setup=1)
+
+    def close(self):
+        self.controller.close()
+
+    def meas_vdc(self, meas_range='AUTO'):
+        # cmd = r"[:SENSe[1]]:VOLTage[:DC]:RANGe: AUTO"
+        cmd = "VOLT:DC:RANG:AUTO ON"
+        # cmd = ":SENS:VOLT:DC:RANG AUTO"
+
+        self.write(cmd)
+
+        return self.query(":MEASure:VOLTage:DC?")
+
+    def meas_idc(self, meas_range='AUTO'):
+        # cmd = r"[:SENSe[1]]:VOLTage[:DC]:RANGe: AUTO"
+        cmd = "CURR:DC:RANG:AUTO ON"
+        # cmd = ":SENS:VOLT:DC:RANG AUTO"
+
+        self.write(cmd)
+
+        return self.query(":MEASure:CURRent:DC?")
+
+    def meas_vac(self, meas_range='AUTO'):
+        # cmd = r"[:SENSe[1]]:VOLTage[:DC]:RANGe: AUTO"
+        cmd = "VOLT:AC:RANG:AUTO ON"
+        # cmd = ":SENS:VOLT:DC:RANG AUTO"
+
+        self.write(cmd)
+
+        return self.query(":MEASure:VOLTage:AC?")
+
+    def meas_2w(self, meas_range='AUTO'):
+        cmd = "RES:RANG:AUTO ON"
+        self.write(cmd)
+
+        return self.query(":MEASure:RESistance?")
+
+    def clear_trigger(self):
+        scpi_instruction = {
+            'cmd1': ':*RST',
+        }
+        for key, value in scpi_instruction.items():
+            self.write(value)
+
+    def trigger_mode(self):
+        range_cmd = ":SENS:VOLT:DC:RANG 10"
+        self.write(range_cmd)
+
+        scpi_instruction = {
+            'cmd1': ':*RST',
+            'cmd2': ':TRIGger:LOAD "EMPTY"',
+            'cmd3': ':TRIGger:BLOCk:BUFFer:CLE 1, "defbuffer1"',
+            'cmd4': ':TRIGger:BLOCk:DELay:CONStant 2, 1e-3',
+            'cmd5': ':TRIGger:BLOCk:MDIGitize 3, "defbuffer1", 1',
+            'cmd6': ':TRIGger:BLOCk:BRANch:LIMit:CONStant 4, ABOVe, 0, 1.6, 1,3',
+            'cmd7': ':TRIGger:BLOCk:MDIGitize 5, "defbuffer1", 1',
+            'cmd8': ':TRIGger:BLOCk:BRANch:LIMit:CONStant 6, BELow, 1.5, 0, 0,5',
+            'cmd9': ':INIT'
+        }
+        for key, value in scpi_instruction.items():
+            self.write(value)
+
+    def get_data_from_trigger_model(self):
+        while True:
+            data = self.query(':TRIGger:STATe?')
+            print(data)  # "IDLE;IDLE;6"
+            results = data.split(sep=';')
+            if results[0] == "IDLE" and results[1] == "IDLE" and results[2] == "6":
+                return round(float(self.fetch()), 3)
+            time.sleep(0.001)
+
+
+if __name__ == "__main__":
+    print(USER_SETUP._value2member_map_)
+    # print(ROOT.RCL.value.format(setup=USER_SETUP.SETUP_0.value))
+    # print(f"{ROOT.RCL.value} {USER_SETUP.SETUP_0.value}")
+
+    # scanner = PyVISAScanner()
+    # connect_type, port = scanner.scan_for_instruments(expected_id="DMM6500")
+    #
+    # instr = DMM6500(visa_port=port, connection_type=connect_type)
+    #
+    # cycle = 1000
+    # for i in range(cycle):
+    #     instr.trigger_mode()
+    #     result = instr.get_data_from_trigger_model()
+    #     print(f"Lasted value: {result}")
+    #     if result > 1.6:
+    #         print(f"Failed at {i}")
+    #
+    #         break
+    #     time.sleep(1)
+    # print(f"Finish {cycle} cycle")
+    # instr.clear_trigger()
+
+    # dcv = instr.meas_vdc()
+    # print(f'Measured Voltage: {dcv}')
+    # print(f'Fetch buffer: {instr.fetch()}')
+    #
+    # idc = instr.meas_idc()
+    # print(f'Measured Current: {idc}')
+    # print(f'Fetch buffer: {instr.fetch()}')
+
+    # acv = instr.meas_vac()
+    # print(f'Measured Voltage: {acv}')
+
+    # resistance_2w = instr.meas_2w()
+    # print(f'Measured Resistance: {resistance_2w}')
+    # print(f'Fetch buffer: {instr.fetch()}')
+
+    # instr.close()

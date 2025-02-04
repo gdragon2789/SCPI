@@ -1,0 +1,57 @@
+    # socket_instrument.py
+    import socket
+    import time
+
+    class SocketInstrument:
+        def __init__(self,
+                     ip_address : str,
+                     tcp_port: int,
+                     timeout : float | None = 1,
+                     buffer_size : int = 4096) -> None:
+            self._connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._connection.settimeout(timeout)
+            self._connection.connect((ip_address, tcp_port))
+            self.buffer_size = buffer_size
+            idn = self.query("*IDN?")
+            if idn:
+                self._idn = idn
+                print(f"Connected to {idn}.")
+            else:
+                self.disconnect()
+                print("Socket Instrument could not be identified.")
+
+        def write(self, command: str) -> None:
+            command += "\n"  # Add termination
+            self._connection.sendall(command.encode())
+
+        def query(self, command: str) -> str:
+            self.write(command)
+            recv_bytes = bytes(0)
+            while True:
+                recv_bytes += self._connection.recv(self.buffer_size)
+                if recv_bytes[-1:] == b"\n":
+                    return recv_bytes.decode()[:-1]
+
+        def disconnect(self) -> None:
+            self._connection.close()
+
+    if __name__ == "__main__":
+        import pyvisa
+
+        IP_ADDRESS = "169.254.119.254"  # IP address of the instrument at local network
+        PORT = 5025  # Port used by the instrument
+
+        rm = pyvisa.ResourceManager()
+        print(rm.list_resources_info())
+        instr = SocketInstrument(IP_ADDRESS, PORT,timeout=2000)
+
+        time.sleep(0.001)
+
+        # Clear the status
+        instr.write('*CLS')
+
+        # Send SCPI command to measure voltage
+        voltage = instr.query('MEAS:VOLT:DC?')
+        print(f'Measured Voltage: {voltage}')
+
+        instr.disconnect()

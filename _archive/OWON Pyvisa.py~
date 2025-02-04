@@ -1,0 +1,156 @@
+import pyvisa
+import time
+
+class SCPI_VISA:
+    def __init__(self, resource_name: str, timeout: float = 0.001, buffer_size: int = 4096, debug=False) -> None:
+        """
+        Initializes the SCPI_VISA class for communicating with SCPI instruments over VISA.
+
+        :param resource_name: The VISA resource name (e.g., 'ASRL39::INSTR').
+        :param timeout: Read timeout in seconds.
+        :param buffer_size: Size of the buffer for reading responses.
+        """
+        self.rm = pyvisa.ResourceManager()
+        self.instrument = self.rm.open_resource(resource_name)
+        self.instrument.timeout = timeout * 1000  # Timeout in milliseconds for PyVISA
+        self.buffer_size = buffer_size
+        self.debug = debug
+        self.default_ovp = None
+        self.default_ocp = None
+
+        idn = self.query("*IDN?")
+        if idn:
+            self._idn = idn
+            print(f"Connected to {idn}.")
+            self.write(command="*RST")
+            self.get_default_status()
+        else:
+            self.disconnect()
+            print("VISA Instrument could not be identified.")
+
+    def get_default_status(self):
+        self.default_ocp = float(self.query(command="CURRent:LIMit?"))
+        self.default_ovp = float(self.query(command="VOLTage:LIMit?"))
+        if self.debug:
+            print(f"Default OCP is set to: {self.default_ocp}A")
+            print(f"Default OVP is set to: {self.default_ovp}V")
+
+    def write(self, command: str) -> None:
+        """
+        Sends a SCPI command to the instrument.
+
+        :param command: SCPI command string.
+        """
+        self.instrument.write(command)
+
+    def query(self, command: str) -> str:
+        """
+        Sends a SCPI command and reads the response.
+
+        :param command: SCPI command string.
+        :return: The response string from the instrument.
+        """
+        return self.instrument.query(command).strip()
+
+    def disconnect(self) -> None:
+        """Closes the VISA connection."""
+        self.instrument.close()
+
+    def enable_output(self) -> None:
+        cmd = "OUTPut ON"
+        self.write(command=cmd)
+        while True:
+            result = self.query(command="OUTPut?")
+            if result in ["1", "ON"]:
+                break
+            time.sleep(0.001)
+
+    def disable_output(self) -> None:
+        cmd = "OUTPut OFF"
+        self.write(command=cmd)
+        while True:
+            result = self.query(command="OUTPut?")
+            if result in ["0", "OFF"]:
+                break
+            time.sleep(0.001)
+
+    def set_voltage(self, volt=0.0) -> None:
+        if volt >= self.default_ovp:
+            print("Voltage is higher than default OVP")
+            print("Voltage reduced to OVP - 1V")
+            volt = self.default_ovp - 1
+
+        cmd = f"VOLTage {volt}"
+        self.write(command=cmd)
+        result = self.query(command="VOLTage?")
+        if self.debug:
+            print(f"Voltage is set to: {result}V")
+
+    def set_over_voltage_protection(self, volt=0.0) -> None:
+        cmd = f"VOLTage:LIMit {volt}"
+        self.write(command=cmd)
+        result = self.query(command="VOLTage:LIMit?")
+        if self.debug:
+            print(f"OVP is set to: {result}V")
+            if result == str(volt):
+                print("OVP is set successfully")
+            else:
+                print("OVP is not set successfully")
+
+    def set_current(self, curr=0.0) -> None:
+        if curr >= self.default_ocp:
+            print("Current is higher than default OCP")
+            print("Current reduced to OCP - 0.1A")
+            curr = self.default_ocp - 0.1
+
+        cmd = f"CURRent {curr}"
+        self.write(command=cmd)
+        result = self.query(command="MEASure:CURRent?")
+        if self.debug:
+            print(f"Current is set to: {result}A")
+
+    def set_over_current_protection(self, curr=0.0) -> None:
+        cmd = f"CURRent:LIMit {curr}"
+        self.write(command=cmd)
+        result = self.query(command="CURRent:LIMit?")
+        if self.debug:
+            print(f"OCP is set to: {result}A")
+            if result == str(curr):
+                print("OCP is set successfully")
+            else:
+                print("OCP is not set successfully")
+
+    def get_voltage(self) -> float:
+        cmd = "MEAS:VOLT:DC?"
+        result = self.query(command=cmd)
+        return float(result)
+
+    def get_current(self) -> float:
+        cmd = "MEAS:CURR:DC?"
+        result = self.query(command=cmd)
+        return float(result)
+
+if __name__ == "__main__":
+    RESOURCE_NAME = "ASRL39::INSTR"  # Replace with your VISA resource name
+
+    # Initialize the instrument
+    instr = SCPI_VISA(RESOURCE_NAME, timeout=0.001, debug=False)
+
+    instr.disable_output()
+
+    # Example usage
+    # instr.set_voltage(volt=46.0)
+    # instr.set_current(curr=1.2)
+    #
+    print("Voltage before:", instr.get_voltage())
+    print("Current before:", instr.get_current())
+    #
+    instr.enable_output()
+    #
+    # print("Voltage after:", instr.get_voltage())
+    # print("Current after:", instr.get_current())
+    # instr.set_over_current_protection(curr=1)
+    # instr.set_over_voltage_protection(volt=45)
+
+    # Disconnect the instrument
+    instr.disconnect()

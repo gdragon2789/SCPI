@@ -1,0 +1,64 @@
+# instrument.py
+import pyvisa
+
+class Instrument:
+    def __init__(self,
+                 com_port: str | None = None,
+                 ip_address: str | None = None,
+                 tcp_port: int | None = None,
+                 **kwargs) -> None:
+        if com_port is not None and ip_address is None and tcp_port is None:
+            port_number = ''.join(s for s in com_port if s.isdigit())
+            resource_name = f"ASRL{port_number}::INSTR"
+        elif ip_address is not None and com_port is None:
+            if tcp_port is None:
+                resource_name = f"TCPIP::{ip_address}::inst0::INSTR"
+            else:
+                resource_name = f"TCPIP0::{ip_address}::{tcp_port}::SOCKET"
+        elif com_port == "USB":
+            resource_name = 'USB0::0x0A69::0x0870::618300000186::INSTR'
+        else:
+            raise NameError("Invalid arguments: either 'com_port' is given for"
+                            " serial connection or both 'ip_address' and "
+                            "'tcp_port' are given for socket connection.")
+        self._instrument = pyvisa.ResourceManager().open_resource(
+            resource_name=resource_name,
+            write_termination='\n',
+            read_termination='\n',
+            **kwargs
+            )
+        self._check_connection()
+
+    def _check_connection(self):
+        idn = self.query("*IDN?")
+        if idn:
+            self._idn = idn
+            print(f"Connected to {idn}.")
+        else:
+            self.disconnect()
+            print("Instrument could not be identified.")
+
+    def write(self, command: str) -> None:
+        self._instrument.write(command)
+
+    def query(self, command: str) -> str:
+        return self._instrument.query(command)
+
+    def disconnect(self) -> None:
+        self._instrument.close()
+
+    def query_ascii_values(self):
+        return self._instrument.query_ascii_values('CURV?')
+
+if __name__ == '__main__':
+    import pyvisa
+
+    rm = pyvisa.ResourceManager()
+    print(rm.list_resources())
+    print(rm.list_opened_resources())
+
+
+    machine = Instrument(ip_address="169.254.8.98",tcp_port=5025)
+
+    value = machine.query_ascii_values()
+    print(value)

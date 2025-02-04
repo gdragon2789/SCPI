@@ -1,0 +1,189 @@
+# scpi_uart.py
+import serial
+import time
+
+
+class SCPI_UART:
+    def __init__(self, port: str, baudrate: int = 115200, timeout: float | None = 0.001, buffer_size: int = 4096, debug=False) -> None:
+        """
+        Initializes the SCPI_UART class for communicating with SCPI instruments over UART.
+
+        :param port: The serial port (e.g., 'COM3' or '/dev/ttyUSB0').
+        :param baudrate: Baud rate for the UART connection.
+        :param timeout: Read timeout in seconds.
+        :param buffer_size: Size of the buffer for reading responses.
+        """
+        self._connection = serial.Serial(
+            port=port,
+            baudrate=baudrate,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            bytesize=serial.EIGHTBITS,
+            timeout=timeout
+        )
+        self.buffer_size = buffer_size
+        self.debug = debug
+        self.default_ovp = None
+        self.default_ocp = None
+
+        idn = self.query("*IDN?")
+        if idn:
+            self._idn = idn
+            print(f"Connected to {idn}.")
+            self.write(command="*RST")
+            self.get_default_status()
+        else:
+            self.disconnect()
+            print("UART Instrument could not be identified.")
+
+    def get_default_status(self):
+        self.default_ocp = float(self.query(command="CURRent:LIMit?"))
+        self.default_ovp = float(self.query(command="VOLTage:LIMit?"))
+        if self.debug:
+            print(f"Default OCP is set to: {self.default_ocp}A")
+            print(f"Default OVP is set to: {self.default_ovp}V")
+
+    def write(self, command: str) -> None:
+        """
+        Sends a SCPI command to the instrument.
+
+        :param command: SCPI command string.
+        """
+        command += "\n"  # Add termination
+        self._connection.write(command.encode())
+
+    def query(self, command: str) -> str:
+        """
+        Sends a SCPI command and reads the response.
+
+        :param command: SCPI command string.
+        :return: The response string from the instrument.
+        """
+        self.write(command)
+        recv_bytes = b""
+        while True:
+            recv_bytes += self._connection.read(self.buffer_size)
+            if recv_bytes.endswith(b"\n"):
+                return recv_bytes.decode().strip()
+
+    def disconnect(self) -> None:
+        """Closes the UART connection."""
+        self._connection.close()
+
+    def enable_output(self) -> None:
+        cmd = "OUTPut ON"
+        self.write(command=cmd)
+        while True:
+            result = self.query(command="OUTPut?")
+            if result == "1" or result == "ON":
+                break
+            time.sleep(0.001)
+
+    def disable_output(self) -> None:
+        cmd = "OUTPut OFF"
+        self.write(command=cmd)
+        while True:
+            result = self.query(command="OUTPut?")
+            if result == "0" or result == "OFF":
+                break
+            time.sleep(0.001)
+
+    def set_voltage(self,volt=0.0) -> None:
+        if volt >= self.default_ovp:
+            print("Voltage is higher than default OVP")
+            print("Voltage reduced OVP - 1V")
+            volt = volt - 1 # Default the OWON will set the voltage to default OVP - 1V
+
+
+        cmd = f"VOLTage {volt}"
+        verify = "VOLTage?" # result is 5.000V less accurate 4.970V input
+        # verify = "MEAS:VOLT:DC?" # result is 4.970V with more accuracy at 4.970V input
+        self.write(command=cmd)
+        result = self.query(command=verify)
+        if self.debug:
+            print(f"Voltage is set to: {result}V")
+
+    def set_over_voltage_protection(self,volt=0.0) -> None:
+        cmd = f"VOLTage:LIMit {volt}"
+        self.write(command=cmd)
+        result = self.query(command="VOLTage:LIMit?")
+        if self.debug:
+            print(f"OVP is set to: {result}V")
+            if result == volt:
+                print("OVP is set successfully")
+            else:
+                print("OVP is not set successfully")
+
+    def set_current(self,curr=0.0) -> None:
+        if curr >= self.default_ocp:
+            print("Current is higher than default OCP")
+            print("Current reduced OCP - 0.1A")
+            curr = curr - 0.1 # Default the OWON will set the curent to default OCP - 0.1A
+
+        cmd = f"CURRent {curr}"
+        # verify = "CURRent?"
+        verify = "MEASure:CURRent?"
+        self.write(command=cmd)
+        result = self.query(command=verify)
+        if self.debug:
+            print(f"Current is set to: {result}A")
+
+    def set_over_current_protection(self,curr=0.0) -> None:
+        cmd = f"CURRent:LIMit {curr}"
+        self.write(command=cmd)
+        result = self.query(command="CURRent:LIMit?")
+        if self.debug:
+            print(f"OCP is set to: {result}A")
+            if result == curr:
+                print("OCP is set successfully")
+            else:
+                print("OCP is not set successfully")
+
+    def get_voltage(self) -> float:
+        cmd = "MEAS:VOLT:DC?"
+        result = self.query(command=cmd)
+        return float(result)
+
+    def get_current(self) -> float:
+        cmd = "MEAS:CURR:DC?"
+        result = self.query(command=cmd)
+        return float(result)
+
+if __name__ == "__main__":
+    # import serial.tools.list_ports
+    #
+    # def list_com_ports():
+    #     ports = serial.tools.list_ports.comports()
+    #     available_ports = [port.device for port in ports]
+    #     return available_ports
+    #
+    # ports = list_com_ports()
+    # if ports:
+    #     print("Available COM ports:")
+    #     for port in ports:
+    #         print(f" - {port}")
+    # else:
+    #     print("No COM ports found.")
+
+    PORT = "COM38"  # Replace with your COM port
+
+    # Initialize the instrument
+    instr = SCPI_UART(PORT, baudrate=115200, timeout=0.001,debug=False)
+
+    instr.disable_output()
+    #
+    # instr.set_voltage(volt=46.0)
+    # instr.set_current(curr=1.2)
+    #
+    # print("Voltage before:",instr.get_voltage())
+    # print("Current before:",instr.get_current())
+    #
+    # instr.enable_output()
+    #
+    # print("Voltage after:",instr.get_voltage())
+    # print("Current after:",instr.get_current())
+    # instr.set_over_current_protection(curr=1)
+    # instr.set_over_voltage_protection(volt=45)
+
+    # Disconnect the instrument
+    instr.disconnect()

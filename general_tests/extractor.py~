@@ -1,0 +1,70 @@
+import json
+import pandas as pd
+
+# Sample JSON data (replace this with reading from the actual JSON file)
+json_data = {
+    "Select *\r\nFROM TEST_DATA td \r\nWHERE td.vcode = 'V828030002' and test_data LIKE '%MP%' and uut_id = 'P104F00277'\r\nORDER BY id DESC": [
+        {
+            "id": 1216925,
+            "vcode": "V828030002",
+            "process_id": "OP82800003",
+            "process_name": "FRT",
+            "station_id": "TE5",
+            "ita_id": "82800201",
+            "socket_id": 1,
+            "uut_id": "P104F00277",
+            "timestamp": "2025-01-22T03:11:41.907Z",
+            "specs_ver": "0.0.1",
+            "test_result": 1,
+            "cycle_time": 81.7384262084961,
+            "test_data": "{\"test_mode\":\"MP\",\"uid\":\"P104F00277\",...}",
+            "created": "2025-01-22T03:11:41.863Z"
+        },
+        {
+            "id": 1216898,
+            "vcode": "V828030002",
+            "process_id": "OP82800003",
+            "process_name": "FRT",
+            "station_id": "TE5",
+            "ita_id": "82800201",
+            "socket_id": 1,
+            "uut_id": "P104F00277",
+            "timestamp": "2025-01-22T03:09:10.833Z",
+            "specs_ver": "0.0.1",
+            "test_result": 0,
+            "cycle_time": 76.33138275146484,
+            "test_data": "{\"test_mode\":\"MP\",\"uid\":null,...}",
+            "created": "2025-01-22T03:09:10.817Z"
+        }
+    ]
+}
+
+
+# Extract the list of records
+records = json_data[list(json_data.keys())[0]]
+
+# Prepare the main DataFrame from the extracted records
+df_main = pd.DataFrame(records)
+
+# Function to split the nested 'test_data' and flatten it
+def split_test_data(test_data):
+    if test_data:
+        try:
+            return json.loads(test_data)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+# Apply the function to split 'test_data' column
+df_main['test_data_split'] = df_main['test_data'].apply(split_test_data)
+
+# Normalize the 'test_data_split' column to a DataFrame
+df_test_data = pd.json_normalize(df_main['test_data_split'])
+
+# Concatenate the main DataFrame with the normalized test data
+df_combined = pd.concat([df_main.drop(columns=['test_data', 'test_data_split']), df_test_data], axis=1)
+
+# Save the combined DataFrame to an Excel file
+df_combined.to_excel('extracted_test_data.xlsx', index=False)
+
+print("Data extracted and saved to 'extracted_test_data.xlsx'")

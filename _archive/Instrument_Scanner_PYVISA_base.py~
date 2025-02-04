@@ -1,0 +1,125 @@
+import pyvisa
+
+
+class PYVISAScanner:
+    def __init__(self):
+        self.__resource_manager = pyvisa.ResourceManager()
+        self.__resource_store = self.__resource_manager.list_resources()
+        self.__hardware_store = []
+
+    @staticmethod
+    def __decompose_resource_visa(resource_string: str)-> dict:
+        # USB Connection (USB - Universal Serial Bus)
+        usb_result_dict = {
+            "connect_type": str,
+            "vid": str,
+            "pid": str,
+            "sn": str,
+            "resource_type": str,
+        }
+        # TCP/IP Connection (TCPIP - Transport Control Protocol/Internet Protocol)
+        tcp_result_dict = {
+            "connect_type": str,
+            "ip": str,
+            "port": str,
+            "resource_type": str,
+        }
+        # Serial Connection (ASLR - Asynchronous Serial Resource Locator)
+        serial_result_dict = {
+            "connect_type": str,
+            "resource_type": str,
+        }
+
+        components = resource_string.split("::")
+
+        if components[0].startswith("USB"):
+            usb_result_dict["connect_type"] = "USB"
+            usb_result_dict["vid"] = components[1]
+            usb_result_dict["pid"] = components[2]
+            usb_result_dict["sn"] = components[3]
+            usb_result_dict["resource_type"] = components[4]
+            return usb_result_dict
+
+        elif components[0].startswith("TCPIP"):
+             tcp_result_dict["connect_type"] = "TCPIP"
+             tcp_result_dict["ip"] = components[1]
+             tcp_result_dict["port"] = components[2]
+             tcp_result_dict["resource_type"] = components[3]
+             return tcp_result_dict
+
+
+        elif components[0].startswith("ASRL"):
+            serial_result_dict["connect_type"] = "Asynchronous Serial"
+            serial_result_dict["resource_type"] = components[1]
+            return serial_result_dict
+
+        else:
+            return {
+                "connect_type": "Unknown",}
+
+    def scan_instruments(self, expected_id: str):
+        """
+        Scans all connected instruments and checks their *IDN? response.
+
+        :param expected_id: The expected identifier string from the *IDN? response.
+        :return: The resource string of the matching instrument, or None if not found.
+        """
+
+        for instrument in self.__hardware_store:
+            try:
+                with self.__resource_manager.open_resource(instrument) as instr:
+                    instr.timeout = 2000  # Set a timeout for the query
+                    response = instr.query('*IDN?').strip()
+                    if expected_id in response:
+                        print(f"Instrument found: {response} on {instrument}")
+                        return instrument
+                    else:
+                        print(f"No matching instrument on {instrument}: {response}")
+            except pyvisa.VisaIOError as e:
+                print(f"Error on {instrument}: {e}")
+
+        return None
+
+    def list_instruments(self):
+        for resource in self.__resource_store:
+            result = self.__decompose_resource_visa(resource)
+            if result["resource_type"] == "INSTR":
+                self.__hardware_store.append(result)
+            else:
+                pass
+        for instrument in self.__hardware_store:
+            print(instrument)
+            # try:
+            #     with self.__resource_manager.open_resource(instrument) as instr:
+            #         instr.timeout = 1000  # Set a timeout for the query
+            #         response = instr.query('*IDN?').strip()
+            #         print(response)
+            # except pyvisa.VisaIOError as e:
+            #     print(f"Error on {instrument}: {e}")
+
+        return None
+
+
+if __name__ == "__main__":
+    rm = pyvisa.ResourceManager()
+    instruments = rm.list_resources()
+    print(instruments)
+
+    id = "SDM3055"  # Replace with the expected identifier substring
+
+    scanner = PYVISAScanner()
+    # matching_instrument = scanner.scan_instruments(id)
+    #
+    # if matching_instrument:
+    #     print(f"Matching instrument found on: {matching_instrument}")
+    # else:
+    #     print("No matching instrument found.")
+
+    scanner.list_instruments()
+    # ex = "USB0::0xF4EC::0x1201::SDM35HBX801707::INSTR"
+    # ex1 = "TCPIP0::169.254.140.139::inst0::INSTR"
+    # ex2 = "ASRL39::INSTR"
+    #
+    # print(scanner.decompose_components_visa(ex))
+    # print(scanner.decompose_components_visa(ex1))
+    # print(scanner.decompose_components_visa(ex2))
