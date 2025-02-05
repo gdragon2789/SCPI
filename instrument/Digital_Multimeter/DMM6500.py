@@ -667,6 +667,9 @@ class UNITTEST:
 if __name__ == "__main__":
     print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_0))
     print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_1))
+    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_2))
+    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_3))
+    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_4))
     # print(USER_SETUP._value2member_map_)
     # print(ROOT.RCL.value.format(setup=USER_SETUP.SETUP_0.value))
     # print(f"{ROOT.RCL.value} {USER_SETUP.SETUP_0.value}")
