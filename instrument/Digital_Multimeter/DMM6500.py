@@ -522,6 +522,7 @@ class TRIGger(Enum):
     SET_TRIGger_TIMer_STATe = ":TRIGger:TIMer{n}:STATe {state}"
     GET_TRIGger_TIMer_STATe = ":TRIGger:TIMer{n}:STATe?"
 
+
 class DMM6500_V1(VISA_INSTRUMENT):
     def __init__(self, visa_port=None, connection_type=None):
         super().__init__(visa_port, connection_type)
@@ -543,11 +544,6 @@ class DMM6500_V1(VISA_INSTRUMENT):
         """
         cmd = ROOT.SET_RCL.value.format(setup=user_setup)
         self.write(command=cmd)
-
-
-
-
-
 
 
 class DMM6500:
@@ -649,6 +645,7 @@ class DMM6500:
                 return round(float(self.fetch()), 3)
             time.sleep(0.001)
 
+
 class UNITTEST:
     def __init__(self, visa_port, connection_type):
         self.dmm = DMM6500_V1(visa_port=visa_port, connection_type=connection_type)
@@ -657,7 +654,6 @@ class UNITTEST:
         self.dmm.cls()
         self.dmm.ese()
         print(self.dmm.esr())
-
 
     def method_test(self):
         self.dmm.rcl()
