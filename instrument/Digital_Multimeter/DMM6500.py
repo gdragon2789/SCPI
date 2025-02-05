@@ -331,19 +331,223 @@ class SENSe1(Enum):
 
 
 class STATus(Enum):
-    pass
+    """
+    The STATus subsystem controls the status registers of the instrument.
+    """
+    SET_STATus_CLEAr = ":STATus:CLEAr"
+    GET_STATus_OPERation_CONDition = ":STATus:OPERation:CONDition?"
+    SET_STATus_OPERation_ENABle = ":STATus:OPERation:ENABle {n}"
+    GET_STATus_OPERation_ENABle = ":STATus:OPERation:ENABle?"
+    SET_STATus_OPERation_MAP = ":STATus:OPERation:MAP {bitNumber}, {setEvent}, {clearEvent}"
+    GET_STATus_OPERation_MAP = ":STATus:OPERation:MAP? {bitNumber}"
+    GET_STATus_OPERation_EVENt = ":STATus:OPERation:EVENt?"
+    SET_STATus_PRESet = ":STATus:PRESet"
+    GET_STATus_QUEStionable_CONDition = ":STATus:QUEStionable:CONDition?"
+    SET_STATus_QUEStionable_ENABle = ":STATus:QUEStionable:ENABle {n}"
+    GET_STATus_QUEStionable_ENABle = ":STATus:QUEStionable:ENABle?"
+    SET_STATus_QUEStionable_MAP = ":STATus:QUEStionable:MAP {bitNumber}, {setEvent}, {clearEvent}"
+    GET_STATus_QUEStionable_MAP = ":STATus:QUEStionable:MAP? {bitNumber}"
+    GET_STATus_QUEStionable_EVENt = ":STATus:QUEStionable:EVENt?"
 
 
 class SYSTem(Enum):
-    pass
+    """
+    This subsystem contains commands that affect the overall operation of the instrument, such as
+    passwords, beepers, communications, event logs, and time. It also contains queries to determine the
+    card and channels that are available in the DMM6500.
+    """
+    SET_SYSTem_ACCess = ":SYSTem:ACCess {permissions}"
+    GET_SYSTem_ACCess = ":SYSTem:ACCess?"
+    SET_SYSTem_BEERer_IMMediate = ":SYSTem:BEERer:IMMediate {frequency}, {duration}"
+    GET_SYSTem_CARD1_IDN = ":SYSTem:CARD1:IDN?"
+    GET_SYSTem_CARD1_VCHannel_STARt = ":SYSTem:CARD1:VCHannel:STARt?"
+    GET_SYSTem_CARD1_VCHannel_END = ":SYSTem:CARD1:VCHannel:END?"
+    GET_SYSTem_CARD1_VMAX = ":SYSTem:CARD1:VMAX?"
+    SET_SYSTem_CLEAr = ":SYSTem:CLEAr"
+    SET_SYSTem_COMMunication_LAN_CONFigure_AUTO = ":SYSTem:COMMunication:LAN:CONFigure 'AUTO'"
+    SET_SYSTem_COMMunication_LAN_CONFigure_MANu = ":SYSTem:COMMunication:LAN:CONFigure 'MANual,{IPaddress},{NETmask},{GATeway}'"
+    GET_SYSTem_COMMunication_LAN_CONFigure = ":SYSTem:COMMunication:LAN:CONFigure?"
+    GET_SYSTem_COMMunication_LAN_MACaddress = ":SYSTem:COMMunication:LAN:MACaddress?"
+    GET_SYSTem_ERRor_NEXT = ":SYSTem:ERRor:NEXT?"
+    GET_SYSTem_ERRor_CODE_NEXT = ":SYSTem:ERRor:CODE:NEXT?"
+    GET_SYSTem_ERRor_COUNt = ":SYSTem:ERRor:COUNt?"
+    GET_SYSTem_EVENtlog_COUNt = ":SYSTem:EVENtlog:COUNt? {eventType}, {eventType}, {eventType}"
+    GET_SYSTem_EVENtlog_NEXT = ":SYSTem:EVENtlog:NEXT? {eventType}, {eventType}, {eventType}"
+    SET_SYSTem_EVENtlog_POST = ":SYSTem:EVENtlog:POST? {message}, {eventType}"
+    SET_SYSTem_EVENtlog_SAVE = ":SYSTem:EVENtlog:SAVE {filename}, {eventType}"
+    SET_SYSTem_GPIB_ADDRess = ":SYSTem:GPIB:ADDRess {address}"
+    GET_SYSTem_GPIB_ADDRess = ":SYSTem:GPIB:ADDRess?"
+    GET_SYSTem_LFRequency = ":SYSTem:LFRequency?"
+    SET_SYSTem_PASSword_NEW = ":SYSTem:PASSword:NEW {password}"
+    SET_SYSTem_PCARD1 = ":SYSTem:PCARD1 {cardNumber}"
+    SET_SYSTem_POSetup = ":SYSTem:POSetup {name}"
+    GET_SYSTem_POSetup = ":SYSTem:POSetup?"
+    SET_SYSTem_TIME_FULL = ":SYSTem:TIME {year}, {month}, {day}, {hour}, {minute}, {second}"
+    SET_SYSTem_TIME_HMS = ":SYSTem:TIME {hour}, {minute}, {second}"
+    GET_SYSTem_TIME = ":SYSTem:TIME?"
+    GET_SYSTem_TIME_DEFault = ":SYSTem:TIME? 1"
+    GET_SYSTem_VERSion = ":SYSTem:VERSion?"
 
 
 class TRACe(Enum):
-    pass
+    """
+    The TRACe subsystem contains commands that control the reading buffers.
+    """
+    GET_TRACe_ACTual = ":TRACe:ACTual? {bufferName}"
+    GET_TRACe_ACTual_END = ":TRACe:ACTual:END? {bufferName}"
+    GET_TRACe_ACTual_STARt = ":TRACe:ACTual:STARt? {bufferName}"
+    SET_TRACe_CHANnel_MATH = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
+    SET_TRACe_CLEAr = ":TRACe:CLEAr {bufferName}"
+    GET_TRACe_DATA = ":TRACe:DATA? {startIndex}, {endIndex}, {bufferName}, {bufferElements}"
+    SET_TRACe_DELete = ":TRACe:DELEte {bufferName}"
+    SET_TRACe_FILL_MODE = ":TRACe:FILL:MODE {fillType}, {bufferName}"
+    GET_TRACe_FILL_MODE = ":TRACe:FILL:MODE? {bufferName}"
+    SET_TRACe_LOG_STATe = ":TRACe:LOG:STATe {state}, {bufferName}"
+    GET_TRACe_LOG_STATe = ":TRACe:LOG:STATe? {bufferName}"
+    SET_TRACe_MAKE = ":TRACe:MAKE {bufferName}, {bufferSize}, {bufferStyle}"
+    SET_TRACe_MATH = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
+    SET_TRACe_POINts = ":TRACe:POINts {newSize}, {bufferName}"
+    GET_TRACe_POINts = ":TRACe:POINts? {bufferName}"
+    SET_TRACe_SAVE = ":TRACe:SAVE {filename}, {bufferName}, {what}, {start}, {end}"
+    SET_TRACe_SAVE_APPend = ":TRACe:SAVE:APPend {filename}, {bufferName}, {timeFormat}, {start}, {end}"
+    GET_TRACe_STATistics_AVERage = ":TRACe:STATistics:AVERage? {bufferName}, {@<channelName>}"
+    SET_TRACe_STATistics_CLEAr = ":TRACe:STATistics:CLEAr {bufferName}"
+    GET_TRACe_STATistics_MAXimum = ":TRACe:STATistics:MAXimum? {bufferName}, {@<channelName>}"
+    GET_TRACe_STATistics_MINimum = ":TRACe:STATistics:MINimum? {bufferName}, {@<channelName>}"
+    GET_TRACe_STATistics_PK2Pk = ":TRACe:STATistics:PK2Pk? {bufferName}, {@<channelName>}"
+    GET_TRACe_STATistics_SPAN = ":TRACe:STATistics:SPAN? {bufferName}, {@<channelName>}"
+    GET_TRACe_STATistics_STDDev = ":TRACe:STATistics:STDDev? {bufferName}, {@<channelName>}"
+    SET_TRACe_TRIGger = ":TRACe:TRIGger {bufferName}"
+    SET_TRACe_TRIGger_DIGitize = ":TRACe:TRIGger:DIGitize {bufferName}"
+    SET_TRACe_UNIT = ":TRACe:UNIT CUSTOM{n}, {unitOfMeasure}, {bufferName}"
+    SET_TRACe_WRITe_FORMat = ":TRACe:WRITe:FORMat {bufferName}, {units}, {displayDigits}, {extraUnits}, {ExtraDigits}"
+    SET_TRACe_WRITe_READing = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
 
 
 class TRIGger(Enum):
-    pass
+    """
+    The commands in this subsystem configure and control the trigger operations, including the
+    trigger model.
+    """
+    SET_ABORT = ":ABORT"
+    SET_INITiate_IMMediate = ":INITiate:IMMediate"
+    SET_TRIGger_BLENder_CLEAr = ":TRIGger:BLENder{n}:CLEAr"
+    SET_TRIGger_BLENder_MODE = ":TRIGger:BLENder{n}:MODE {operation}"
+    GET_TRIGger_BLENder_MODE = ":TRIGger:BLENder{n}:MODE?"
+    GET_TRIGger_BLENder_OVERrun = ":TRIGger:BLENder{n}:OVERrun?"
+    SET_TRIGger_BLENder_STIMulus = ":TRIGger:BLENder{n}:STIMulus{m} {event}"
+    GET_TRIGger_BLENder_STIMulus = ":TRIGger:BLENder{n}:STIMulus{m}?"
+    SET_TRIGger_BLOCk_BRANch_ALWays = ":TRIGger:BLOCk:BRANch:ALWays {blockNumber}, {branchToBlock}"
+    SET_TRIGger_BLOCk_BRANch_COUNter = ":TRIGger:BLOCk:BRANch:COUNter {blockNumber}, {targetCount}, {branchToBlock}"
+    GET_TRIGger_BLOCk_BRANch_COUNter_COUNt = ":TRIGger:BLOCk:BRANch:COUNter:COUNt? {blockNumber}"
+    SET_TRIGger_BLOCk_BRANch_COUNter_RESet = ":TRIGger:BLOCk:BRANch:COUNter:RESet {blockNumber}, {counter}"
+    SET_TRIGger_BLOCk_BRANch_DELTa = ":TRIGger:BLOCk:BRANch:DELta {blockNumber}, {targetDifference}, {branchToBlock}, {measureDigitizeBlock}"
+    SET_TRIGger_BLOCk_BRANch_EVENt = ":TRIGger:BLOCk:BRANch:EVENt {blockNumber}, {event}, {branchToBlock}"
+    SET_TRIGger_BLOCk_BRANch_LIMit_CONStant = ":TRIGger:BLOCk:BRANch:LIMit:CONStant {blockNumber}, {limitType}, {LimitA}, {LimitB}, {branchToBlock}, {measureDigitizeBlock}"
+    SET_TRIGger_BLOCk_BRANch_LIMit_DYNamic = ":TRIGger:BLOCk:BRANch:LIMit:DYNAmic {blockNumber}, {limitType}, {LimitA}, {LimitB}, {branchToBlock}, {measureDigitizeBlock}"
+    SET_TRIGger_BLOCk_BRANch_ONCE = ":TRIGger:BLOCk:BRANch:ONCE {blockNumber}, {branchToBlock}"
+    SET_TRIGger_BLOCk_BRANch_ONCE_EXCLuded = ":TRIGger:BLOCk:BRANch:ONCE:EXCLuded {blockNumber}, {branchToBlock}"
+    SET_TRIGger_BLOCk_BUFFer_CLEar = ":TRIGger:BLOCk:BUFFer:CLEar {blockNumber}, {bufferName}"
+    SET_TRIGger_BLOCk_CONFig_NEXT = ":TRIGger:BLOCk:CONFig:NEXT {blockNumber}, {configurationList}"
+    SET_TRIGger_BLOCk_CONFig_PREVious = ":TRIGger:BLOCk:CONFig:PREvious {blockNumber}, {configurationList}"
+    SET_TRIGger_BLOCk_CONFig_RECall = ":TRIGger:BLOCk:CONFig:RECall {blockNumber}, {configurationList}, {index}"
+    SET_TRIGger_BLOCk_DELay_CONStant = ":TRIGger:BLOCk:DELay:CONStant {blockNumber}, {time}"
+    SET_TRIGger_BLOCk_DELay_DYNamic = ":TRIGger:BLOCk:DELay:DYNamic {blockNumber}, MEASure{n}"
+    SET_TRIGger_BLOCk_DIGital_IO = ":TRIGger:BLOCk:DIGital:IO {blockNumber}, {bitPattern}, {bitMask}"
+    GET_TRIGger_BLOCk_LIST = ":TRIGger:BLOCk:LIST?"
+    SET_TRIGger_BLOCk_LOG_EVENt = ":TRIGger:BLOCk:LOG:EVENt {blockNumber}, {eventNumber}, {message}"
+    SET_TRIGger_BLOCk_MDIGitize = ":TRIGger:BLOCk:MDIGitize {blockNumber}, {bufferName}, {count}"
+    SET_TRIGger_BLOCk_NOP = ":TRIGger:BLOCk:NOP {blockNumber}"
+    SET_TRIGger_BLOCk_NOTify = ":TRIGger:BLOCk:NOTify {blockNumber}, {notifyID}"
+    SET_TRIGger_BLOCk_WAIT = ":TRIGger:BLOCk:WAIT {blockNumber}, {event}, {clear}, {logic}, {event}, {event}"
+    SET_TRIGger_CONTinuous = ":TRIGger:CONTinuous {setting}"
+    GET_TRIGger_CONTinuous = ":TRIGger:CONTinuous?"
+    SET_TRIGger_DIGital_IN_CLEar = ":TRIGger:DIGital{n}:IN:CLEar"
+    SET_TRIGger_DIGital_IN_EDGE = ":TRIGger:DIGital{n}:IN:EDGE {detectedEdge}"
+    GET_TRIGger_DIGital_IN_EDGE = ":TRIGger:DIGital{n}:IN:EDGE?"
+    GET_TRIGger_DIGital_IN_OVERrun = ":TRIGger:DIGital{n}:IN:OVERrun?"
+    SET_TRIGger_DIGital_OUT_LOGic = ":TRIGger:DIGital{n}:OUT:LOGic {logicType}"
+    GET_TRIGger_DIGital_OUT_LOGic = ":TRIGger:DIGital{n}:OUT:LOGic?"
+    SET_TRIGger_DIGital_OUT_PULSewidth = ":TRIGger:DIGital{n}:OUT:PULSewidth {width}"
+    GET_TRIGger_DIGital_OUT_PULSewidth = ":TRIGger:DIGital{n}:OUT:PULSewidth?"
+    SET_TRIGger_DIGital_OUT_STIMulus = ":TRIGger:DIGital{n}:OUT:STIMulus {event}"
+    GET_TRIGger_DIGital_OUT_STIMulus = ":TRIGger:DIGital{n}:OUT:STIMulus?"
+    SET_TRIGger_EXTernal_IN_CLEar = ":TRIGger:EXTernal:IN:CLEar"
+    SET_TRIGger_EXTernal_IN_EDGE = ":TRIGger:EXTernal:IN:EDGE {detectedEdge}"
+    GET_TRIGger_EXTernal_IN_EDGE = ":TRIGger:EXTernal:IN:EDGE?"
+    GET_TRIGger_EXTernal_IN_OVERrun = ":TRIGger:EXTernal:IN:OVERrun?"
+    SET_TRIGger_EXTernal_OUT_LOGic = ":TRIGger:EXTernal:OUT:LOGic {logicType}"
+    GET_TRIGger_EXTernal_OUT_LOGic = ":TRIGger:EXTernal:OUT:LOGic?"
+    SET_TRIGger_EXTernal_OUT_STIMulus = ":TRIGger:EXTernal:OUT:STIMulus {event}"
+    GET_TRIGger_EXTernal_OUT_STIMulus = ":TRIGger:EXTernal:OUT:STIMulus?"
+    SET_TRIGger_LAN_IN_CLEar = ":TRIGger:LAN:n:IN:CLEar"
+    SET_TRIGger_LAN_IN_EDGE = ":TRIGger:LAN{n}:IN:EDGE {mode}"
+    GET_TRIGger_LAN_IN_EDGE = ":TRIGger:LAN{n}:IN:EDGE?"
+    GET_TRIGger_LAN_IN_OVERrun = ":TRIGger:LAN{n}:IN:OVERrun?"
+    SET_TRIGger_LAN_OUT_CONNect_STATe = ":TRIGger:LAN{n}:OUT:CONNect:STATe {state}"
+    GET_TRIGger_LAN_OUT_CONNect_STATe = ":TRIGger:LAN{n}:OUT:CONNect:STATe?"
+    SET_TRIGger_LAN_OUT_IP_ADDRess = ":TRIGger:LAN{n}:OUT:IP:ADDRess {address}"
+    GET_TRIGger_LAN_OUT_IP_ADDRess = ":TRIGger:LAN{n}:OUT:IP:ADDRess?"
+    SET_TRIGger_LAN_OUT_LOGic = ":TRIGger:LAN{n}:OUT:LOGic {logicType}"
+    GET_TRIGger_LAN_OUT_LOGic = ":TRIGger:LAN{n}:OUT:LOGic?"
+    SET_TRIGger_LAN_OUT_PROTocol = ":TRIGger:LAN{n}:OUT:PROTocol {protocol}"
+    GET_TRIGger_LAN_OUT_PROTocol = ":TRIGger:LAN{n}:OUT:PROTocol?"
+    SET_TRIGger_LAN_OUT_STIMulus = ":TRIGger:LAN{n}:OUT:STIMulus {LANevent}"
+    GET_TRIGger_LAN_OUT_STIMulus = ":TRIGger:LAN{n}:OUT:STIMulus?"
+    SET_TRIGger_LOAD_ConfigList = ":TRIGger:LOAD 'ConfigList', {measureConfigList}, {delay}, {bufferName}"
+    SET_TRIGger_LOAD_DurationLoop = ":TRIGger:LOAD 'DurationLoop', {duration}, {delay}, {readingBuffer}"
+    SET_TRIGger_LOAD_Empty = ":TRIGger:LOAD 'EMPTY'"
+    SET_TRIGger_LOAD_GradeBinning = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
+    SET_TRIGger_LOAD_LogicTrigger = ":TRIGger:LOAD 'LogicTrigger', {digInLine}, {digOutLine}, {count}, {clear}, {delay}, {bufferName}"
+    SET_TRIGger_LOAD_LoopUntilEvent = ":TRIGger:LOAD 'LoopUntilEvent', {eventConstant}, {position}, {clear}, {delay}, {bufferName}"
+    SET_TRIGger_LOAD_SimpleLoop = ":TRIGger:LOAD 'SimpleLoop', {count}, {delay}, {bufferName}"
+    SET_TRIGger_LOAD_SortBinning = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
+    SET_TRIGger_PAUSe = ":TRIGger:PAUSe"
+    SET_TRIGger_RESume = ":TRIGger:RESume"
+    GET_TRIGger_STATe = ":TRIGger:STATe?"
+    SET_TRIGger_TIMer_CLEar = ":TRIGger:TIMer{n}:CLEar"
+    SET_TRIGger_TIMer_COUNt = ":TRIGger:TIMer{n}:COUNt {count}"
+    GET_TRIGger_TIMer_COUNt = ":TRIGger:TIMer{n}:COUNt?"
+    SET_TRIGger_TIMer_DELay = ":TRIGger:TIMer{n}:DELay {interval}"
+    GET_TRIGger_TIMer_DELay = ":TRIGger:TIMer{n}:DELay?"
+    SET_TRIGger_TIMer_STARt_FRACtional = ":TRIGger:TIMer{n}:STARt:FRACtional {time}"
+    GET_TRIGger_TIMer_STARt_FRACtional = ":TRIGger:TIMer{n}:STARt:FRACtional?"
+    SET_TRIGger_TIMer_STARt_GENerate = ":TRIGger:TIMer{n}:STARt:GENerate {state}"
+    GET_TRIGger_TIMer_STARt_GENerate = ":TRIGger:TIMer{n}:STARt:GENerate?"
+    GET_TRIGger_TIMer_STARt_OVERrun = ":TRIGger:TIMer<n>:STARt:OVERrun?"
+    SET_TRIGger_TIMer_STARt_SEConds = ":TRIGger:TIMer{n}:STARt:SEConds {time}"
+    GET_TRIGger_TIMer_STARt_SEConds = ":TRIGger:TIMer{n}:STARt:SEConds?"
+    SET_TRIGger_TIMer_STARt_STIMulus = ":TRIGger:TIMer{n}:STARt:STIMulus {event}"
+    GET_TRIGger_TIMer_STARt_STIMulus = ":TRIGger:TIMer{n}:STARt:STIMulus?"
+    SET_TRIGger_TIMer_STATe = ":TRIGger:TIMer{n}:STATe {state}"
+    GET_TRIGger_TIMer_STATe = ":TRIGger:TIMer{n}:STATe?"
+
+class DMM6500_V1(VISA_INSTRUMENT):
+    def __init__(self, visa_port=None, connection_type=None):
+        super().__init__(visa_port, connection_type)
+        self.controller._connection.timeout = 60000
+
+    def rcl(self, user_setup=USER_SETUP.SETUP_0) -> None:
+        """
+        Brief:
+            -   This command returns the instrument to the setup that was saved with the *SAV command.
+        Details:
+            -   Restores the state of the instrument from a copy of user-saved settings that are stored in setup
+            memory. The settings are saved using the *SAV command.
+
+            -   If you view the user-saved settings from the front panel of the instrument, these are stored as scripts
+            named Setup0<n>.
+        Example:
+            -   CMD: *RCL 3
+        :return: None
+        """
+        cmd = ROOT.SET_RCL.value.format(setup=user_setup)
+        self.write(command=cmd)
+
+
+
+
+
 
 
 class DMM6500:
@@ -374,8 +578,6 @@ class DMM6500:
 
     def fetch(self, buffer_name="defbuffer1"):
         return self.controller.query(f':FETCh? "{buffer_name}"')
-
-    ROOT.RCL.value.format(setup=1)
 
     def close(self):
         self.controller.close()
@@ -447,9 +649,25 @@ class DMM6500:
                 return round(float(self.fetch()), 3)
             time.sleep(0.001)
 
+class UNITTEST:
+    def __init__(self, visa_port, connection_type):
+        self.dmm = DMM6500_V1(visa_port=visa_port, connection_type=connection_type)
+
+    def ieee488_2_common_commands(self):
+        self.dmm.cls()
+        self.dmm.ese()
+        print(self.dmm.esr())
+
+
+    def method_test(self):
+        self.dmm.rcl()
+        self.dmm.rst()
+
 
 if __name__ == "__main__":
-    print(USER_SETUP._value2member_map_)
+    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_0))
+    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_1))
+    # print(USER_SETUP._value2member_map_)
     # print(ROOT.RCL.value.format(setup=USER_SETUP.SETUP_0.value))
     # print(f"{ROOT.RCL.value} {USER_SETUP.SETUP_0.value}")
 
