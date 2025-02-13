@@ -3,8 +3,10 @@ import time
 from enum import Enum
 from SCPI.controller.__init__ import *
 
+
 class DeviceConst(Enum):
-    STANDARD_EVENT_STATUS_REGISTER_WEIGHTS = (1,2,4,8,16,32,64,128)
+    STANDARD_EVENT_STATUS_REGISTER_WEIGHTS = (1, 2, 4, 8, 16, 32, 64, 128)
+
 
 class VISA_INSTRUMENT:
     def __init__(self, visa_port=None, connection_type=None):
@@ -16,13 +18,13 @@ class VISA_INSTRUMENT:
     def __connect(self):
         if self.connection_type == "USB":
             self.controller = PYVISA_Controller(visa_port=self.visa_port, debug=True)
-            self.cls()
+            self.cc_cls()
         elif self.connection_type == "TCP/IP":
             self.controller = TCPIP_Controller(ip_address=self.visa_port, debug=False)
-            self.cls()
+            self.cc_cls()
         elif self.connection_type == "Serial":
             self.controller = SERIAL_Controller(port=self.visa_port, debug=True)
-            self.cls()
+            self.cc_cls()
 
     def write(self, command: str) -> None:
         self.controller.write(command)
@@ -34,11 +36,11 @@ class VISA_INSTRUMENT:
         self.controller.close()
 
     # IEEE 488.2 Common Commands
-    def cls(self) -> None:
+    def cc_cls(self) -> None:
         cmd = f"*CLS"
         self.controller.write(cmd)
 
-    def ese(self,mask:int = 0):
+    def cc_ese(self, mask: int = 0):
         if self.is_valid_combination(input_value=mask,
                                      list_range=DeviceConst.STANDARD_EVENT_STATUS_REGISTER_WEIGHTS.value):
             cmd = f":*ESE {mask}"
@@ -50,21 +52,21 @@ class VISA_INSTRUMENT:
             else:
                 return False
 
-    def esr(self):
+    def cc_esr(self):
         cmd = f"*ESR?"
         return self.query(cmd)
 
-    def opc(self) -> bool:
+    def cc_opc(self) -> bool:
         cmd = f"*OPC?"
         return self.controller.query(cmd).lower() == "1"
 
-    def rst(self):
+    def cc_rst(self):
         cmd = f"*RST"
         self.controller.write(cmd)
 
-    def sre(self, mask:int = 0):
+    def cc_sre(self, mask: int = 0):
         if self.is_valid_combination(input_value=mask,
-                list_range=DeviceConst.STANDARD_EVENT_STATUS_REGISTER_WEIGHTS.value):
+                                     list_range=DeviceConst.STANDARD_EVENT_STATUS_REGISTER_WEIGHTS.value):
             cmd = f"*SRE {mask}"
             self.write(cmd)
             time.sleep(0.001)
@@ -74,7 +76,7 @@ class VISA_INSTRUMENT:
             else:
                 return False
 
-    def stb(self):
+    def cc_stb(self):
         """
         Query the condition register for the state byte register set.
         :return:
@@ -85,17 +87,48 @@ class VISA_INSTRUMENT:
         """
         return self.query(f"*STB?")
 
-    def tst(self):
+    def cc_tst(self):
         """
         Perform a self-test and query the result.
         :return: 0 if Pass else 1 if Fail
         """
         return self.query(f"*TST?")
 
+    def template_command(self, param=None) -> None:
+        """
+        Brief:
+            -   This command returns the instrument to the setup that was saved with the *SAV command.
+        Details:
+            -   Restores the state of the instrument from a copy of user-saved settings that are stored in setup
+            memory. The settings are saved using the *SAV command.
 
+            -   If you view the user-saved settings from the front panel of the instrument, these are stored as scripts
+            named Setup0<n>.
+        Example:
+            -   CMD: *RCL 3
+        :return: None
+        """
+        # Enum information about the command, specified for each instrument.
+        cmd = "ROOT.SET_RCL.value.format(param=user_setup)"
+        self.write(command=cmd)
 
-
-
+    def template_query(self,
+                       param1=None,
+                       param2=None) -> str:
+        """
+        Brief:
+            -   This command requests the latest reading from a reading buffer.
+        Details:
+            -   This command requests the last available reading from a reading buffer. If you send this command
+            more than once and there are no new readings, the returned values are the same. If the reading
+            buffer is empty, an error is returned.
+        Example:
+            -   CMD: :FETCh? "defbuffer1",  READing
+        :return: string
+        """
+        # Enum information about the command, specified for each instrument.
+        cmd = "ROOT.GET_FETCh.value.format(bufferName=param1, bufferElements=param2)"
+        return self.query(command=cmd)
 
     # Utility function
     @staticmethod

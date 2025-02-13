@@ -13,6 +13,13 @@ class USER_SETUP(Enum):
     SETUP_4 = 4
 
 
+class DEFAULT_SETUP(Enum):
+    """
+    user-saved settings that are stored in setup memory.
+    """
+    DEFBUFFER1 = "defbuffer1"
+
+
 class FUNCTION(Enum):
     """
     Functions available on the instrument
@@ -30,6 +37,11 @@ class FUNCTION(Enum):
     FREQ = "FREQuency:VOLTage"
     PER = "PERiod:VOLTage"
     VOLT_RAT = "VOLTage:DC:RATio"
+
+
+class DIGITIZE_FUNCTION(Enum):
+    VOLT = "VOLTage"
+    CURR = "CURRent"
 
 
 class BUFFER_ELEMENTS(Enum):
@@ -528,7 +540,8 @@ class DMM6500_V1(VISA_INSTRUMENT):
         super().__init__(visa_port, connection_type)
         self.controller._connection.timeout = 60000
 
-    def rcl(self, user_setup=USER_SETUP.SETUP_0) -> None:
+    def rcl(self,
+            user_setup=USER_SETUP.SETUP_0) -> None:
         """
         Brief:
             -   This command returns the instrument to the setup that was saved with the *SAV command.
@@ -545,7 +558,176 @@ class DMM6500_V1(VISA_INSTRUMENT):
         cmd = ROOT.SET_RCL.value.format(setup=user_setup)
         self.write(command=cmd)
 
+    def sav(self,
+            user_setup=USER_SETUP.SETUP_0) -> None:
+        """
+        Brief:
+            -   Save the present instrument settings as a user-saved setup.
+        Details:
+            -   Most commands that are affected by *RST can be saved with the *SAV command.
+            -   You can save up to five user-saved setups. Any settings that had been stored previously as <n> are
+                overwritten.
+            -   If you view the user-saved setups from the front panel of the instrument, they are stored as scripts
+                named Setup0<n>.
+        Example:
+            -   CMD: *SAV 2
+        :return: None
+        """
+        cmd = ROOT.SET_SAV.value.format(setup=user_setup)
+        self.write(command=cmd)
 
+    def fetch(self,
+              buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+              buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+        Brief:
+            -   This command requests the latest reading from a reading buffer.
+        Details:
+            -   This command requests the last available reading from a reading buffer. If you send this command
+            more than once and there are no new readings, the returned values are the same. If the reading
+            buffer is empty, an error is returned.
+        Example:
+            -   CMD: :FETCh? "<bufferName>", <bufferElements>
+        :return: string
+        """
+        cmd = ROOT.GET_FETCh.value.format(bufferName=buffer_name,
+                                          bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+    def measure(self,
+                buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+                buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+        Brief:
+            -   This command makes measurements with the current function (except for digitize),
+            and places them in a reading buffer, and returns the last reading.
+        Details:
+            -   This command makes a measurement using the specified function and stores the reading in a
+            reading buffer.
+            -   If you do not define the function parameter, the instrument uses the presently selected measure
+            function. If a digitize function is presently selected, an error is generated.
+            -   This query makes the number of readings specified by [:SENSe[1]]:COUNt. When you use a
+            reading buffer with a command or action that makes multiple readings, all readings are available in
+            the reading buffer. However, only the last reading is returned as a reading with the command.
+            -   If you define a specific reading buffer, the reading buffer must exist before you make the
+            measurement.
+            -   To get multiple readings, use the :TRACe:DATA? command.
+            -   :MEASure? performs the same function as READ?.
+            -   :MEASure:<function>? performs the same function as sending :SENse:FUNCtion, then READ?.
+        Example:
+            -   CMD: :MEASure? "<bufferName>", <bufferElements>
+        :return: string
+        """
+        cmd = ROOT.GET_MEASURE.value.format(bufferName=buffer_name,
+                                            bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+    def measure_with(self,
+                     function=FUNCTION.VOLT_DC,
+                     buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+                     buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+            Brief:
+                -   Same as measure but with a specific function (except for digitize)
+            Details:
+                -   Refer to measure()
+            Example:
+                -   CMD: :MEASure:<function>? "<bufferName>", <bufferElements>
+            :return: string
+        """
+        cmd = ROOT.GET_MEASURE_WITH.value.format(function=function,
+                                                 bufferName=buffer_name,
+                                                 bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+    def measure_digitize(self,
+                         buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+                         buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+            Brief:
+                -   This command makes a digitize measurement with the current function, places it in a reading buffer, and returns the reading
+            Details:
+                -   This command makes a digitize measurement using the specified function and stores the reading in a
+                reading buffer. Sending this command changes the measurement function to the one specified by
+                <function>. This function remains selected after the measurement is complete.
+                -   If you do not define the function parameter, the instrument uses the presently selected function. If a
+                digitize function is presently selected, an error is generated.
+                -   When you use a reading buffer with a command or action that makes multiple readings, all readings
+                are available in the reading buffer. However, only the last reading is returned as a reading with the
+                command.
+                -   If you define a specific reading buffer, the reading buffer must exist before you make the
+                measurement.
+                -   To get multiple readings, use the :TRACe:DATA? command.
+                -   :MEASure:DIGitize? performs the same function as READ:DIGitize?.
+                -   :MEASure:DIGitize:<function>? performs the same function as sending
+                -   :SENse:DIGitize:FUNCtion "<function>", then READ?.
+            Example:
+                -   CMD: :MEASure:DIGitize? "<bufferName>", <bufferElements>
+            :return: string
+        """
+        cmd = ROOT.GET_MEASURE_DIGITIZE.value.format(bufferName=buffer_name,
+                                                     bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+    def measure_digitize_with(self,
+                              function=DIGITIZE_FUNCTION.VOLT,
+                              buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+                              buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+            Brief:
+                -   Same as measure_digitize but with a specific function
+            Details:
+                -   Refer to measure_digitize()
+            Example:
+                -   CMD: :MEASure:DIGitize:<function>? "<bufferName>", <bufferElements>
+            :return: string
+        """
+        cmd = ROOT.GET_MEASURE_DIGITIZE_WITH.value.format(function=function,
+                                                          bufferName=buffer_name,
+                                                          bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+    def read(self,
+             buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+             buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+        Brief:
+            -   This command requests the latest reading from a reading buffer.
+        Details:
+            -   This query makes the number of readings specified by [:SENSe[1]]:COUNt. If multiple readings
+            are made, all readings are available in the reading buffer.
+            -   However, only the last reading is returned as a reading with the command.
+            -   To get multiple readings, use the :TRACe:DATA? command.
+        Example:
+            -   CMD: :READ? "<bufferName>", <bufferElements>
+        :return: string
+        """
+        cmd = ROOT.GET_READ.value.format(bufferName=buffer_name,
+                                         bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+    def read_digitize(self,
+                      buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
+                      buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
+        """
+        Brief:
+            -   This command requests the latest reading from a reading buffer.
+        Details:
+            -   You must set the instrument to a digitize function before sending this command.
+            -   This query makes the number of readings specified by [:SENSe[1]]:DIGitize:COUNt. If multiple
+            readings are made, all readings are available in the reading buffer.
+            -   However, only the last reading is returned as a reading with the command.
+            -   To get multiple readings, use the :TRACe:DATA? command.
+        Example:
+            -   CMD: :READ:DIGitize? "<bufferName>", <bufferElements>
+        :return: string
+        """
+        cmd = ROOT.GET_READ_DIGITIZE.value.format(bufferName=buffer_name,
+                                                  bufferElements=buffer_elements)
+        return self.query(command=cmd)
+
+
+"""
 class DMM6500:
     def __init__(self, visa_port=None, connection_type=None):
         self.visa_port = visa_port
@@ -644,6 +826,7 @@ class DMM6500:
             if results[0] == "IDLE" and results[1] == "IDLE" and results[2] == "6":
                 return round(float(self.fetch()), 3)
             time.sleep(0.001)
+"""
 
 
 class UNITTEST:
@@ -651,13 +834,19 @@ class UNITTEST:
         self.dmm = DMM6500_V1(visa_port=visa_port, connection_type=connection_type)
 
     def ieee488_2_common_commands(self):
-        self.dmm.cls()
-        self.dmm.ese()
-        print(self.dmm.esr())
+        self.dmm.cc_cls()
+        self.dmm.cc_ese()
+        self.dmm.cc_opc()
 
     def method_test(self):
         self.dmm.rcl()
-        self.dmm.rst()
+        self.dmm.sav()
+        self.dmm.fetch()
+        self.dmm.measure()
+        self.dmm.measure_with()
+        self.dmm.measure_digitize()
+        self.dmm.read()
+        self.dmm.read_digitize()
 
 
 if __name__ == "__main__":
