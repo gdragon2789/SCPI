@@ -1,2 +1,2 @@
-from SCPI.api.PyVISAScanner import *
-from SCPI.api.VISA_INSTRUMENT import *
+from api.PyVISAScanner import *
+from api.VISA_INSTRUMENT import *

@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="472fee0c-11cd-40fe-bd4f-e5b4accd2db5" name="Changes" comment="- Update ROOT function" />
+    <list default="true" id="472fee0c-11cd-40fe-bd4f-e5b4accd2db5" name="Changes" comment="- Update ROOT function">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/PyVISAScanner.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/PyVISAScanner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/VISA_INSTRUMENT.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/VISA_INSTRUMENT.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/controller/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/instrument/Digital_Multimeter/DMM6500.py" beforeDir="false" afterPath="$PROJECT_DIR$/instrument/Digital_Multimeter/DMM6500.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,16 +40,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.DMM6500.executor": "Run",
-    "Python.SPE6053.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "dev1",
-    "last_opened_file_path": "D:/Engineering/Electronics Designs/_Tester/8280/828001/3.0 Implementation/3.2 APP/828001"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.DMM6500.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.SPE6053.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Engineering/Electronics Designs/_Tester/8280/828001/3.0 Implementation/3.2 APP/828001&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Python.DMM6500">
     <configuration name="DMM6500" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="SCPI_Learning" />
@@ -133,11 +141,6 @@
           <url>file://$PROJECT_DIR$/instrument/Power_Supply/SPE6053.py</url>
           <line>104</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/instrument/Digital_Multimeter/DMM6500.py</url>
-          <line>1101</line>
-          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

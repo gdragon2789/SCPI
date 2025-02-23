@@ -1,7 +1,7 @@
 # Virtual instrument software architecture
 import time
 from enum import Enum
-from SCPI.controller.__init__ import *
+from controller.__init__ import *
 
 
 class DeviceConst(Enum):

@@ -1,3 +1,3 @@
-from SCPI.controller.PYVISA import *
-from SCPI.controller.SERIAL import *
-from SCPI.controller.TCPIP import *
+from controller.PYVISA import *
+from controller.SERIAL import *
+from controller.TCPIP import *

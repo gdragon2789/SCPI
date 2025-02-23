@@ -1,5 +1,8 @@
-from SCPI.api.__init__ import *
-from SCPI.controller.__init__ import *
+import time
+
+from api.__init__ import *
+from controller.__init__ import *
+import re
 
 
 class USER_SETUP(Enum):
@@ -11,6 +14,107 @@ class USER_SETUP(Enum):
     SETUP_2 = 2
     SETUP_3 = 3
     SETUP_4 = 4
+
+
+class EDGE_TYPE(Enum):
+    FALLing = "FALLing"
+    RISing = "RISing"
+    EITHer = "EITHer"
+
+
+class TTL(Enum):
+    POSitive = "POSitive"
+    NEGative = "NEGative"
+
+class EVENT(Enum):
+    NONE = "NONE"
+    NOTify = "NOTify{n}"
+    COMMand = "COMMand"
+    DIGio = "DIGio{n}"
+    TSPLink = "TSPLink{n}"
+    LAN = "LAN{n}"
+    BLENder = "BLENder{n}"
+    TIMer = "TIMer{n}"
+    EXTernal = "EXTernal"
+    SCANCHANnel = "SCANCHANnel"
+    SCANCOMPlete = "SCANCOMPlete"
+    SCANMEASure = "SCANMEASure"
+    SCANALARmlimit = "SCANALARmlimit"
+
+class RANGE(Enum):
+    DC_100mV = "100e-3"
+    DC_1V = "1"
+    DC_10V = "10"
+    DC_100V = "100"
+    DC_1000V = "1e3"
+    AC_100mV = "100e-3"
+    AC_1V = "1"
+    AC_10V = "10"
+    AC_100V = "100"
+    AC_750V = "750"
+    DC_10uA = "10e-6"
+    DC_100uA = "100e-6"
+    DC_1mA = "1e-3"
+    DC_10mA = "10e-3"
+    DC_100mA = "100e-3"
+    DC_1A = "1"
+    DC_3A = "3"
+    DC_10A_ONLY_REAR_TERMINAL = "10"
+    AC_1mA = "1e-3"
+    AC_10mA = "10e-3"
+    AC_100mA = "100e-3"
+    AC_1A = "1"
+    AC_3A = "3"
+    AC_10A_ONLY_REAR_TERMINAL = "10"
+    RES_2W_10ohm = "10"
+    RES_2W_100ohm = "100"
+    RES_2W_1kohm = "1e3"
+    RES_2W_10kohm = "10e3"
+    RES_2W_100kohm = "100e3"
+    RES_2W_1mohm = "1e6"
+    RES_2W_10mohm = "10e6"
+    RES_2W_100mohm = "100e6"
+    RES_4W_1ohm = "1"
+    RES_4W_1Oohm = "10"
+    RES_4W_100ohm = "100"
+    RES_4W_1kohm = "1e3"
+    RES_4W_10kohm = "10e3"
+    RES_4W_100kohm = "100e3"
+    RES_4W_1mohm = "1e6"
+    RES_4W_10mohm = "10e6"
+    RES_4W_100mohm = "100e6"
+    RES_4W_OFFSET_1ohm = "1"
+    RES_4W_OFFSET_1Oohm = "10"
+    RES_4W_OFFSET_100ohm = "100"
+    RES_4W_OFFSET_1kohm = "1e3"
+    RES_4W_OFFSET_10kohm = "10e3"
+    CAP_1nF = "1e-9"
+    CAP_10nF = "10e-9"
+    CAP_100nF = "100e-9"
+    CAP_1uF = "1e-6"
+    CAP_10uF = "10e-6"
+    CAP_100uF = "100e-6"
+    CAP_1mF = "1e-3"
+    RATIO_DC_100mV = "100e-3"
+    RATIO_DC_1V = "1"
+    RATIO_DC_10V = "10"
+    RATIO_DC_100V = "100"
+    RATIO_DC_1000V = "1000"
+    DIGI_VOLT_100mV = "100e-3"
+    DIGI_VOLT_1V = "1"
+    DIGI_VOLT_10V = "10"
+    DIGI_VOLT_100V = "100"
+    DIGI_VOLT_1000V = "1e3"
+    DIGI_CURR_10uA = "10e-6"
+    DIGI_CURR_100uA = "100e-6"
+    DIGI_CURR_1mA = "1e-3"
+    DIGI_CURR_10mA = "10e-3"
+    DIGI_CURR_100mA = "100e-3"
+    DIGI_CURR_1A = "1"
+    DIGI_CURR_3A = "3"
+    TIME_1ms = "1e-3"
+    TIME_1us = "1e-6"
+    TIME_1ns = "1e-9"
 
 
 class DEFAULT_SETUP(Enum):
@@ -71,44 +175,44 @@ class BUFFER_ELEMENTS(Enum):
 class ROOT(Enum):
     SET_RCL = "*RCL {setup}"
     SET_SAV = "*SAV {setup}"
-    GET_FETCh = ":FETCh? {bufferName}, {bufferElements}"
-    GET_MEASURE = ":MEASure? {bufferName}, {bufferElements"
-    GET_MEASURE_WITH = ":MEASure:{function}? {bufferName}, {bufferElements}"
-    GET_MEASURE_DIGITIZE = ":MEASure:DIGitize? {bufferName}, {bufferElements}"
-    GET_MEASURE_DIGITIZE_WITH = ":MEASure:DIGitize:{function}? {bufferName}, {bufferElements}"
-    GET_READ = ":READ? {bufferName}, {bufferElements}"
-    GET_READ_DIGITIZE = ":READ:DIGitize? {bufferName}, {bufferElements}"
-
+    GET_FETCh = ":FETCh? '{bufferName}', {bufferElements}"
+    GET_MEASURE = ":MEASure? '{bufferName}', {bufferElements}"
+    GET_MEASURE_WITH = ":MEASure:{function}? '{bufferName}', {bufferElements}"
+    GET_MEASURE_DIGITIZE = ":MEASure:DIGitize? '{bufferName}', {bufferElements}"
+    GET_MEASURE_DIGITIZE_WITH = ":MEASure:DIGitize:{function}? '{bufferName}', {bufferElements}"
+    GET_READ = ":READ? '{bufferName}', {bufferElements}"
+    GET_READ_DIGITIZE = ":READ:DIGitize? '{bufferName}', {bufferElements}"
+    SET_TRIG = "*TRG"
 
 class CALCulate(Enum):
     """
     The commands in this subsystem configure and control the math and limit operations
     """
     # Limit test sub system
-    SET_LIMIt_STATe = ":CALCulate2:{function}:LIMit{Y}:STATe {state}, {@<channelList>}"
-    GET_LIMIt_STATe = ":CALCulate2:{function}:LIMit{Y}:STATe? {@<channelList>}"
-    SET_AUDible = ":CALCulate2:{function}:LIMit{Y}:AUDible {state}, {@<channelList>}"
-    GET_AUDible = ":CALCulate2:{function}:LIMit{Y}:AUDible? {@<channelList>}"
-    SET_CLEAr_AUTO = ":CALCulate2:{function}:CLEar:AUTO {state}, {@<channelList>}"
-    GET_CLEAr_AUTO = ":CALCulate2:{function}:CLEar:AUTO? {@<channelList>}"
+    SET_LIMIt_STATe = ":CALCulate2:{function}:LIMit{Y}:STATe {state}, {channelList}"
+    GET_LIMIt_STATe = ":CALCulate2:{function}:LIMit{Y}:STATe? {channelList}"
+    SET_AUDible = ":CALCulate2:{function}:LIMit{Y}:AUDible {state}, {channelList}"
+    GET_AUDible = ":CALCulate2:{function}:LIMit{Y}:AUDible? {channelList}"
+    SET_CLEAr_AUTO = ":CALCulate2:{function}:CLEar:AUTO {state}, {channelList}"
+    GET_CLEAr_AUTO = ":CALCulate2:{function}:CLEar:AUTO? {channelList}"
     SET_CLEAr_RESUtls = ":CALCulate2:{function}:LIMit{Y}:CLEar:IMMediate"
-    GET_LIMIt_RESULts = ":CALCulate2:{function}:LIMIT{Y}:FAIL? {@<channelList>}"
-    SET_LOWEr_LIMIt = ":CALCulate2:{function}:LIMit{Y}:LOWer:DATA {n}, {@<channelList>}"
-    GET_LOWEr_LIMIt = ":CALCulate2:{function}:LIMit{Y}:LOWer:DATA? {@<channelList>}"
-    SET_UPPER_LIMIt = ":CALCulate2:{function}:LIMit{Y}:UPPer:DATA {n}, {@<channelList>}"
-    GET_UPPER_LIMIt = ":CALCulate2:{function}:LIMit{Y}:UPPer:DATA? {@<channelList>}"
+    GET_LIMIt_RESULts = ":CALCulate2:{function}:LIMIT{Y}:FAIL? {channelList}"
+    SET_LOWEr_LIMIt = ":CALCulate2:{function}:LIMit{Y}:LOWer:DATA {n}, {channelList}"
+    GET_LOWEr_LIMIt = ":CALCulate2:{function}:LIMit{Y}:LOWer:DATA? {channelList}"
+    SET_UPPER_LIMIt = ":CALCulate2:{function}:LIMit{Y}:UPPer:DATA {n}, {channelList}"
+    GET_UPPER_LIMIt = ":CALCulate2:{function}:LIMit{Y}:UPPer:DATA? {channelList}"
 
     # Math sub system
-    SET_MATH_STATe = ":CALCulate1:{function}:STATe {state}, {@<channelList>}"
-    GET_MATH_STATe = ":CALCulate1:{function}:STATe? {@<channelList>}"
-    SET_MATH_FORMat = ":CALCulate1:{function}:FORMat {state}, {@<channelList>}"
-    GET_MATH_FORMat = ":CALCulate1:{function}:FORMat? {@<channelList>}"
-    SET_MATH_MBFactor = ":CALCulate1:{function}:MBFACTOR {n}, {@<channelList>}"
-    GET_MATH_MBFactor = ":CALCulate1:{function}:MBFACTOR? {@<channelList>}"
-    SET_MATH_MMFactor = ":CALCulate1:{function}:MMFACTOR {value}, {@<channelList>}"
-    GET_MATH_MMFactor = ":CALCulate1:{function}:MMFACTOR? {@<channelList>}"
-    SET_MATH_PERCent = ":CALCulate1:{function}:PERCent {value}, {@<channelList>}"
-    GET_MATH_PERCent = ":CALCulate1:{function}:PERCent? {@<channelList>}"
+    SET_MATH_STATe = ":CALCulate1:{function}:STATe {state}, {channelList}"
+    GET_MATH_STATe = ":CALCulate1:{function}:STATe? {channelList}"
+    SET_MATH_FORMat = ":CALCulate1:{function}:FORMat {state}, {channelList}"
+    GET_MATH_FORMat = ":CALCulate1:{function}:FORMat? {channelList}"
+    SET_MATH_MBFactor = ":CALCulate1:{function}:MBFACTOR {n}, {channelList}"
+    GET_MATH_MBFactor = ":CALCulate1:{function}:MBFACTOR? {channelList}"
+    SET_MATH_MMFactor = ":CALCulate1:{function}:MMFACTOR {value}, {channelList}"
+    GET_MATH_MMFactor = ":CALCulate1:{function}:MMFACTOR? {channelList}"
+    SET_MATH_PERCent = ":CALCulate1:{function}:PERCent {value}, {channelList}"
+    GET_MATH_PERCent = ":CALCulate1:{function}:PERCent? {channelList}"
 
 
 class DIGital(Enum):
@@ -128,18 +232,18 @@ class DISPlay(Enum):
     """
     This subsystem contains commands that control the front-panel display.
     """
-    SET_DISPlay_BUFFer_ACTive = ":DISPlay:BUFFer:ACTive {bufferName}"
+    SET_DISPlay_BUFFer_ACTive = ":DISPlay:BUFFer:ACTive '{bufferName}'"
     GET_DISPlay_BUFFer_ACTive = ":DISPlay:BUFFer:ACTive?"
     SET_DISPlay_BUFFer_CLEar = ":DISPlay:CLEar"
-    SET_DISPlay_DIGIits = ":DISPlay:{function}:DIGits {value}, {@<channelList>}"
-    GET_DISPlay_DIGIits = ":DISPlay:{function}:DIGits? {@<channelList>}"
+    SET_DISPlay_DIGIits = ":DISPlay:{function}:DIGits {value}, {channelList}"
+    GET_DISPlay_DIGIits = ":DISPlay:{function}:DIGits? {channelList}"
     SET_DISPlay_LIGHt_STATe = ":DISPlay:LIGHt:STATe {brightness}"
     GET_DISPlay_LIGHt_STATe = ":DISPlay:LIGHt:STATe?"
     SET_DISPlay_READing_FORMat = ":DISPlay:READing:FORMat {format}"
     GET_DISPlay_READing_FORMat = ":DISPlay:READing:FORMat?"
     SET_DISPlay_SCReen = ":DISPlay:SCReen {screenName}"
     SET_DISPlay_USER_TEXt = ":DISPlay:USER{n}:TEXT:DATA {textMessage}"
-    SET_DISPlay_WATCh_CHANnels = ":DISPlay:WATCh:CHANnels (@<channelList>)"
+    SET_DISPlay_WATCh_CHANnels = ":DISPlay:WATCh:CHANnels (channelList)"
     GET_DISPlay_WATCh_CHANnels = ":DISPlay:WATCh:CHANnels?"
 
 
@@ -164,25 +268,25 @@ class ROUTe(Enum):
     """
     SET_ABORt = ":ABORt"
     SET_INITiate_IMMediate = ":INITiate:IMMediate"
-    SET_ROUTe_CHANnel_CLOSe = ":ROUTe:CHANnel:CLOSe {@<channelList>}"
+    SET_ROUTe_CHANnel_CLOSe = ":ROUTe:CHANnel:CLOSe {channelList}"
     GET_ROUTe_CHANnel_CLOSe = ":ROUTe:CHANnel:CLOSe?"
-    GET_ROUTe_CHANnel_CLOSe_COUNt = ":ROUTe:CHANnel:CLOSe:COUNt? {@<channelList>}"
-    SET_ROUTe_CHANnel_DELay = ":ROUTe:CHANnel:DELay {value}, {@<channelList>}"
-    GET_ROUTe_CHANnel_DELay = ":ROUTe:CHANnel:DELay? {@<channelList>}"
-    SET_ROUTe_CHANnel_LABel = ":ROUTe:CHANnel:LABel {label}, {@<channelList>}"
-    GET_ROUTe_CHANnel_LABel = ":ROUTe:CHANnel:LABel? {@<channelList>}"
-    SET_ROUTe_CHANnel_MULTiple_CLOSe = ":ROUTe:CHANnel:MULTiple:CLOSe {@<channelList>}"
+    GET_ROUTe_CHANnel_CLOSe_COUNt = ":ROUTe:CHANnel:CLOSe:COUNt? {channelList}"
+    SET_ROUTe_CHANnel_DELay = ":ROUTe:CHANnel:DELay {value}, {channelList}"
+    GET_ROUTe_CHANnel_DELay = ":ROUTe:CHANnel:DELay? {channelList}"
+    SET_ROUTe_CHANnel_LABel = ":ROUTe:CHANnel:LABel {label}, {channelList}"
+    GET_ROUTe_CHANnel_LABel = ":ROUTe:CHANnel:LABel? {channelList}"
+    SET_ROUTe_CHANnel_MULTiple_CLOSe = ":ROUTe:CHANnel:MULTiple:CLOSe {channelList}"
     GET_ROUTe_CHANnel_MULTiple_CLOSe = ":ROUTe:CHANnel:MULTiple:CLOSe?"
-    SET_ROUTe_CHANnel_MULTiple_OPEN = ":ROUTe:CHANnel:MULTiple:OPEN {@<channelList>}"
-    SET_ROUTe_CHANnel_OPEN = ":ROUTe:CHANnel:OPEN {@<channelList>}"
+    SET_ROUTe_CHANnel_MULTiple_OPEN = ":ROUTe:CHANnel:MULTiple:OPEN {channelList}"
+    SET_ROUTe_CHANnel_OPEN = ":ROUTe:CHANnel:OPEN {channelList}"
     SET_ROUTe_CHANnel_OPEN_ALL = ":ROUTe:CHANnel:OPEN:ALL"
-    GET_ROUTe_CHANnel_STATe = ":ROUTe:CHANnel:STATe? {@<channelList>}"
-    GET_ROUTe_CHANnel_TYPE = ":ROUTe:CHANnel:TYPE? {@<channelList>}"
-    SET_ROUTe_SCAN_ADD = ":ROUTe:SCAN:ADD {@<channelList>}, {configurationList}, {index}"
-    SET_ROUTe_SCAN_ADD_SINGle = ":ROUTe:SCAN:ADD:SINGle {@<channelList>}, {configurationList}, {index}"
+    GET_ROUTe_CHANnel_STATe = ":ROUTe:CHANnel:STATe? {channelList}"
+    GET_ROUTe_CHANnel_TYPE = ":ROUTe:CHANnel:TYPE? {channelList}"
+    SET_ROUTe_SCAN_ADD = ":ROUTe:SCAN:ADD {channelList}, {configurationList}, {index}"
+    SET_ROUTe_SCAN_ADD_SINGle = ":ROUTe:SCAN:ADD:SINGle {channelList}, {configurationList}, {index}"
     SET_ROUTe_SCAN_ALARm = ":ROUTe:SCAN:ALARm {n}"
     GET_ROUTe_SCAN_ALARm = ":ROUTe:SCAN:ALARm?"
-    SET_ROUTe_SCAN_BUFFer = ":ROUTe:SCAN:BUFFer {bufferName}"
+    SET_ROUTe_SCAN_BUFFer = ":ROUTe:SCAN:BUFFer '{bufferName}'"
     GET_ROUTe_SCAN_BUFFer = ":ROUTe:SCAN:BUFFer?"
     SET_ROUTe_SCAN_BYPass = ":ROUTe:SCAN:BYPass {bypass}"
     GET_ROUTe_SCAN_BYPass = ":ROUTe:SCAN:BYPass?"
@@ -191,7 +295,7 @@ class ROUTe(Enum):
     SET_ROUTe_SCAN_COUNt_SCAN = ":ROUTe:SCAN:COUNt:SCAN {scanCount}"
     GET_ROUTe_SCAN_COUNt_SCAN = ":ROUTe:SCAN:COUNt:SCAN?"
     GET_ROUTe_SCAN_COUNt_STEP = ":ROUTe:SCAN:COUNt:STEP?"
-    SET_ROUTe_SCAN_CREate = ":ROUTe:SCAN:CREate {@<channelList>}, {configurationList}, {index}"
+    SET_ROUTe_SCAN_CREate = ":ROUTe:SCAN:CREate {channelList}, {configurationList}, {index}"
     GET_ROUTe_SCAN_CREate = ":ROUTe:SCAN:CREate?"
     SET_ROUTe_SCAN_EXPOrt = ":ROUTe:SCAN:EXPort /usb1/{filename}, {when}, {what}"
     SET_ROUTe_SCAN_INTerval = ":ROUTe:SCAN:INTerval {interval}"
@@ -233,97 +337,97 @@ class SENSe1(Enum):
     Many of these commands are set for a specific function. For example, you can program a range
     setting for each function. The settings are saved with that function.
     """
-    SET_SENSe1_APERture = ":SENSe1:{function}:APERture {n}, {@<channelList>}"
-    GET_SENSe1_APERture = ":SENSe1:{function}:APERture? {@<channelList>}"
-    SET_SENSe1_ATRigger_EDGE_LEVel = ":SENSe1:{function}:ATRigger:EDGE:LEVel {setting}, {@<channelList>}"
-    GET_SENSe1_ATRigger_EDGE_LEVel = ":SENSe1:{function}:ATRigger:EDGE:LEVel? {@<channelList>}"
-    SET_SENSe1_ATRigger_EDGE_SLOpe = ":SENSe1:{function}:ATRigger:EDGE:SLOpe {setting}, {@<channelList>}"
-    GET_SENSe1_ATRigger_EDGE_SLOpe = ":SENSe1:{function}:ATRigger:EDGE:SLOpe? {@<channelList>}"
-    SET_SENSe1_ATRigger_MODE = ":SENSe1:{function}:ATRigger:MODE {setting}, {@<channelList>}"
-    GET_SENSe1_ATRigger_MODE = ":SENSe1:{function}:ATRigger:MODE? {@<channelList>}"
-    SET_SENSe1_ATRigger_WINDow_DIRection = ":SENSe1:{function}:ATRigger:WINDow:DIRection {setting}, {@<channelList>}"
-    GET_SENSe1_ATRigger_WINDow_DIRection = ":SENSe1:{function}:ATRigger:WINDow:DIRection? {@<channelList>}"
-    SET_SENSe1_ATRigger_WINDow_LEVel_HIGH = ":SENSe1:{function}:ATRigger:WINDow:LEVel:HIGH {setting}, {@<channelList>}"
-    GET_SENSe1_ATRigger_WINDow_LEVel_HIGH = ":SENSe1:{function}:ATRigger:WINDow:LEVel:HIGH? {@<channelList>}"
-    SET_SENSe1_ATRigger_WINDow_LEVel_LOW = ":SENSe1:{function}:ATRigger:WINDow:LEVel:LOW {setting}, {@<channelList>}"
-    GET_SENSe1_ATRigger_WINDow_LEVel_LOW = ":SENSe1:{function}:ATRigger:WINDow:LEVel:LOW? {@<channelList>}"
-    SET_SENSe1_AVERage_COUNt = ":SENSe1:{function}:AVERage:COUNt {n}, {@<channelList>}"
-    GET_SENSe1_AVERage_COUNt = ":SENSe1:{function}:AVERage:COUNt? {@<channelList>}"
-    SET_SENSe1_AVERage_STATe = ":SENSe1:{function}:AVERage:STATe {state}, {@<channelList>}"
-    GET_SENSe1_AVERage_STATe = ":SENSe1:{function}:AVERage:STATe? {@<channelList>}"
-    SET_SENSe1_AVERage_TCONtrol = ":SENSe1:{function}:AVERage:TCONtrol {type}, {@<channelList>}"
-    GET_SENSe1_AVERage_TCONtrol = ":SENSe1:{function}:AVERage:TCONtrol? {@<channelList>}"
-    SET_SENSe1_AVERage_WINDow = ":SENSe1:{function}:AVERage:WINDow {n}, {@<channelList>}"
-    GET_SENSe1_AVERage_WINDow = ":SENSe1:{function}:AVERage:WINDow? {@<channelList>}"
-    SET_SENSe1_AZERo_STATe = ":SENSe1:{function}:AZERo:STATe {state}, {@<channelList>}"
-    GET_SENSe1_AZERo_STATe = ":SENSe1:{function}:AZERo:STATe? {@<channelList>}"
-    SET_SENSe1_BIAS_LEVel = ":SENSe1:{function}:BIAS:LEVel {n}, {@<channelList>}"
-    GET_SENSe1_BIAS_LEVel = ":SENSe1:{function}:BIAS:LEVel? {@<channelList>}"
-    SET_SENSe1_DB_REFerence = ":SENSe1:{function}:DB:REFERence {n}, {@<channelList>}"
-    GET_SENSe1_DB_REFerence = ":SENSe1:{function}:DB:REFERence? {@<channelList>}"
-    SET_SENSe1_DBM_REFerence = ":SENSe1:{function}:DBM:REFERence {n}, {@<channelList>}"
-    GET_SENSe1_DBM_REFerence = ":SENSe1:{function}:DBM:REFERence? {@<channelList>}"
-    SET_SENSe1_DELay_AUTO = ":SENSe1:{function}:DELay:AUTO {state}, {@<channelList>}"
-    GET_SENSe1_DELay_AUTO = ":SENSe1:{function}:DELay:AUTO? {@<channelList>}"
-    SET_SENSe1_DELay_USER = ":SENSe1:{function}:DELay:USER {delayTime}, {@<channelList>}"
-    GET_SENSe1_DELay_USER = ":SENSe1:{function}:DELay:USER? {@<channelList>}"
-    SET_SENSe1_DETector_BANDwidth = ":SENSe1:{function}:DETector:BANDwidth {n}, {@<channelList>}"
-    GET_SENSe1_DETector_BANDwidth = ":SENSe1:{function}:DETector:BANDwidth? {@<channelList>}"
-    SET_SENSe1_INPutimpedance = ":SENSe1:{function}:INPutimpedance {n}, {@<channelList>}"
-    GET_SENSe1_INPutimpedance = ":SENSe1:{function}:INPutimpedance? {@<channelList>}"
-    SET_SENSe1_LINE_SYNC = ":SENSe1:{function}:LINE:SYNC {state}, {@<channelList>}"
-    GET_SENSe1_LINE_SYNC = ":SENSe1:{function}:LINE:SYNC? {@<channelList>}"
-    SET_SENSe1_NPLCycle = ":SENSe1:{function}:NPLCycle {n}, {@<channelList>}"
-    GET_SENSe1_NPLCycle = ":SENSe1:{function}:NPLCycle? {@<channelList>}"
-    SET_SENSe1_OCOMpensated = ":SENSe1:{function}:OCOMpensated {state}, {@<channelList>}"
-    GET_SENSe1_OCOMpensated = ":SENSe1:{function}:OCOMpensated? {@<channelList>}"
-    SET_SENSe1_ODETector = ":SENSe1:{function}:ODETector {state}, {@<channelList>}"
-    GET_SENSe1_ODETector = ":SENSe1:{function}:ODETector? {@<channelList>}"
-    SET_SENSe1_RANGe_AUTO = ":SENSe1:{function}:RANGe:AUTO {state}, {@<channelList>}"
-    GET_SENSe1_RANGe_AUTO = ":SENSe1:{function}:RANGe:AUTO? {@<channelList>}"
-    SET_SENSe1_RANGe_UPPer = ":SENSe1:{function}:RANGe:UPPer {n}, {@<channelList>}"
-    GET_SENSe1_RANGe_UPPer = ":SENSe1:{function}:RANGe:UPPer? {@<channelList>}"
-    SET_SENSe1_RELative = ":SENSe1:{function}:RELative {state}, {@<channelList>}"
-    GET_SENSe1_RELative = ":SENSe1:{function}:RELative? {@<channelList>}"
+    SET_SENSe1_APERture = ":SENSe1:{function}:APERture {n}, {channelList}"
+    GET_SENSe1_APERture = ":SENSe1:{function}:APERture? {channelList}"
+    SET_SENSe1_ATRigger_EDGE_LEVel = ":SENSe1:{function}:ATRigger:EDGE:LEVel {setting}, {channelList}"
+    GET_SENSe1_ATRigger_EDGE_LEVel = ":SENSe1:{function}:ATRigger:EDGE:LEVel? {channelList}"
+    SET_SENSe1_ATRigger_EDGE_SLOpe = ":SENSe1:{function}:ATRigger:EDGE:SLOpe {setting}, {channelList}"
+    GET_SENSe1_ATRigger_EDGE_SLOpe = ":SENSe1:{function}:ATRigger:EDGE:SLOpe? {channelList}"
+    SET_SENSe1_ATRigger_MODE = ":SENSe1:{function}:ATRigger:MODE {setting}, {channelList}"
+    GET_SENSe1_ATRigger_MODE = ":SENSe1:{function}:ATRigger:MODE? {channelList}"
+    SET_SENSe1_ATRigger_WINDow_DIRection = ":SENSe1:{function}:ATRigger:WINDow:DIRection {setting}, {channelList}"
+    GET_SENSe1_ATRigger_WINDow_DIRection = ":SENSe1:{function}:ATRigger:WINDow:DIRection? {channelList}"
+    SET_SENSe1_ATRigger_WINDow_LEVel_HIGH = ":SENSe1:{function}:ATRigger:WINDow:LEVel:HIGH {setting}, {channelList}"
+    GET_SENSe1_ATRigger_WINDow_LEVel_HIGH = ":SENSe1:{function}:ATRigger:WINDow:LEVel:HIGH? {channelList}"
+    SET_SENSe1_ATRigger_WINDow_LEVel_LOW = ":SENSe1:{function}:ATRigger:WINDow:LEVel:LOW {setting}, {channelList}"
+    GET_SENSe1_ATRigger_WINDow_LEVel_LOW = ":SENSe1:{function}:ATRigger:WINDow:LEVel:LOW? {channelList}"
+    SET_SENSe1_AVERage_COUNt = ":SENSe1:{function}:AVERage:COUNt {n}, {channelList}"
+    GET_SENSe1_AVERage_COUNt = ":SENSe1:{function}:AVERage:COUNt? {channelList}"
+    SET_SENSe1_AVERage_STATe = ":SENSe1:{function}:AVERage:STATe {state}, {channelList}"
+    GET_SENSe1_AVERage_STATe = ":SENSe1:{function}:AVERage:STATe? {channelList}"
+    SET_SENSe1_AVERage_TCONtrol = ":SENSe1:{function}:AVERage:TCONtrol {type}, {channelList}"
+    GET_SENSe1_AVERage_TCONtrol = ":SENSe1:{function}:AVERage:TCONtrol? {channelList}"
+    SET_SENSe1_AVERage_WINDow = ":SENSe1:{function}:AVERage:WINDow {n}, {channelList}"
+    GET_SENSe1_AVERage_WINDow = ":SENSe1:{function}:AVERage:WINDow? {channelList}"
+    SET_SENSe1_AZERo_STATe = ":SENSe1:{function}:AZERo:STATe {state}, {channelList}"
+    GET_SENSe1_AZERo_STATe = ":SENSe1:{function}:AZERo:STATe? {channelList}"
+    SET_SENSe1_BIAS_LEVel = ":SENSe1:{function}:BIAS:LEVel {n}, {channelList}"
+    GET_SENSe1_BIAS_LEVel = ":SENSe1:{function}:BIAS:LEVel? {channelList}"
+    SET_SENSe1_DB_REFerence = ":SENSe1:{function}:DB:REFERence {n}, {channelList}"
+    GET_SENSe1_DB_REFerence = ":SENSe1:{function}:DB:REFERence? {channelList}"
+    SET_SENSe1_DBM_REFerence = ":SENSe1:{function}:DBM:REFERence {n}, {channelList}"
+    GET_SENSe1_DBM_REFerence = ":SENSe1:{function}:DBM:REFERence? {channelList}"
+    SET_SENSe1_DELay_AUTO = ":SENSe1:{function}:DELay:AUTO {state}, {channelList}"
+    GET_SENSe1_DELay_AUTO = ":SENSe1:{function}:DELay:AUTO? {channelList}"
+    SET_SENSe1_DELay_USER = ":SENSe1:{function}:DELay:USER {delayTime}, {channelList}"
+    GET_SENSe1_DELay_USER = ":SENSe1:{function}:DELay:USER? {channelList}"
+    SET_SENSe1_DETector_BANDwidth = ":SENSe1:{function}:DETector:BANDwidth {n}, {channelList}"
+    GET_SENSe1_DETector_BANDwidth = ":SENSe1:{function}:DETector:BANDwidth? {channelList}"
+    SET_SENSe1_INPutimpedance = ":SENSe1:{function}:INPutimpedance {n}, {channelList}"
+    GET_SENSe1_INPutimpedance = ":SENSe1:{function}:INPutimpedance? {channelList}"
+    SET_SENSe1_LINE_SYNC = ":SENSe1:{function}:LINE:SYNC {state}, {channelList}"
+    GET_SENSe1_LINE_SYNC = ":SENSe1:{function}:LINE:SYNC? {channelList}"
+    SET_SENSe1_NPLCycle = ":SENSe1:{function}:NPLCycle {n}, {channelList}"
+    GET_SENSe1_NPLCycle = ":SENSe1:{function}:NPLCycle? {channelList}"
+    SET_SENSe1_OCOMpensated = ":SENSe1:{function}:OCOMpensated {state}, {channelList}"
+    GET_SENSe1_OCOMpensated = ":SENSe1:{function}:OCOMpensated? {channelList}"
+    SET_SENSe1_ODETector = ":SENSe1:{function}:ODETector {state}, {channelList}"
+    GET_SENSe1_ODETector = ":SENSe1:{function}:ODETector? {channelList}"
+    SET_SENSe1_RANGe_AUTO = ":SENSe1:{function}:RANGe:AUTO {state}, {channelList}"
+    GET_SENSe1_RANGe_AUTO = ":SENSe1:{function}:RANGe:AUTO? {channelList}"
+    SET_SENSe1_RANGe_UPPer = ":SENSe1:{function}:RANGe:UPPer {n}, {channelList}"
+    GET_SENSe1_RANGe_UPPer = ":SENSe1:{function}:RANGe:UPPer? {channelList}"
+    SET_SENSe1_RELative = ":SENSe1:{function}:RELative {state}, {channelList}"
+    GET_SENSe1_RELative = ":SENSe1:{function}:RELative? {channelList}"
     SET_SENSe1_RELative_ACQuire = ":SENSe1:{function}:RELative:ACQuire"
-    SET_SENSe1_RELative_METHod = ":SENSe1:{function}:RELative:METHod {n}, {@<channelList>}"
-    GET_SENSe1_RELative_METHod = ":SENSe1:{function}:RELative:METHod? {@<channelList>}"
-    SET_SENSe1_RELative_STATe = ":SENSe1:{function}:RELative:STATe {state}, {@<channelList>}"
-    GET_SENSe1_RELative_STATe = ":SENSe1:{function}:RELative:STATe? {@<channelList>}"
-    SET_SENSe1_RTD_ALPHa = ":SENSe1:{function}:RTD:ALPHa {n}, {@<channelList>}"
-    GET_SENSe1_RTD_ALPHa = ":SENSe1:{function}:RTD:ALPHa? {@<channelList>}"
-    SET_SENSe1_RTD_BETA = ":SENSe1:{function}:RTD:BETA {n}, {@<channelList>}"
-    GET_SENSe1_RTD_BETA = ":SENSe1:{function}:RTD:BETA? {@<channelList>}"
-    SET_SENSe1_RTD_DELTa = ":SENSe1:{function}:RTD:DELTa {n}, {@<channelList>}"
-    GET_SENSe1_RTD_DELTa = ":SENSe1:{function}:RTD:DELTa? {@<channelList>}"
-    SET_SENSe1_RTD_FOUR = ":SENSe1:{function}:RTD:FOUR {type}, {@<channelList>}"
-    GET_SENSe1_RTD_FOUR = ":SENSe1:{function}:RTD:FOUR? {@<channelList>}"
-    SET_SENSe1_RTD_THRee = ":SENSe1:{function}:RTD:THRee {type}, {@<channelList>}"
-    GET_SENSe1_RTD_THRee = ":SENSe1:{function}:RTD:THRee? {@<channelList>}"
-    SET_SENSe1_RTD_TWO = ":SENSe1:{function}:RTD:TWO {type}, {@<channelList>}"
-    GET_SENSe1_RTD_TWO = ":SENSe1:{function}:RTD:TWO? {@<channelList>}"
-    SET_SENSe1_RTD_ZERO = ":SENSe1:{function}:RTD:ZERO {n}, {@<channelList>}"
-    GET_SENSe1_RTD_ZERO = ":SENSe1:{function}:RTD:ZERO? {@<channelList>}"
-    SET_SENSe1_SRATe = ":SENSe1:{function}:SRATe {n}, {@<channelList>}"
-    GET_SENSe1_SRATe = ":SENSe1:{function}:SRATe? {@<channelList>}"
+    SET_SENSe1_RELative_METHod = ":SENSe1:{function}:RELative:METHod {n}, {channelList}"
+    GET_SENSe1_RELative_METHod = ":SENSe1:{function}:RELative:METHod? {channelList}"
+    SET_SENSe1_RELative_STATe = ":SENSe1:{function}:RELative:STATe {state}, {channelList}"
+    GET_SENSe1_RELative_STATe = ":SENSe1:{function}:RELative:STATe? {channelList}"
+    SET_SENSe1_RTD_ALPHa = ":SENSe1:{function}:RTD:ALPHa {n}, {channelList}"
+    GET_SENSe1_RTD_ALPHa = ":SENSe1:{function}:RTD:ALPHa? {channelList}"
+    SET_SENSe1_RTD_BETA = ":SENSe1:{function}:RTD:BETA {n}, {channelList}"
+    GET_SENSe1_RTD_BETA = ":SENSe1:{function}:RTD:BETA? {channelList}"
+    SET_SENSe1_RTD_DELTa = ":SENSe1:{function}:RTD:DELTa {n}, {channelList}"
+    GET_SENSe1_RTD_DELTa = ":SENSe1:{function}:RTD:DELTa? {channelList}"
+    SET_SENSe1_RTD_FOUR = ":SENSe1:{function}:RTD:FOUR {type}, {channelList}"
+    GET_SENSe1_RTD_FOUR = ":SENSe1:{function}:RTD:FOUR? {channelList}"
+    SET_SENSe1_RTD_THRee = ":SENSe1:{function}:RTD:THRee {type}, {channelList}"
+    GET_SENSe1_RTD_THRee = ":SENSe1:{function}:RTD:THRee? {channelList}"
+    SET_SENSe1_RTD_TWO = ":SENSe1:{function}:RTD:TWO {type}, {channelList}"
+    GET_SENSe1_RTD_TWO = ":SENSe1:{function}:RTD:TWO? {channelList}"
+    SET_SENSe1_RTD_ZERO = ":SENSe1:{function}:RTD:ZERO {n}, {channelList}"
+    GET_SENSe1_RTD_ZERO = ":SENSe1:{function}:RTD:ZERO? {channelList}"
+    SET_SENSe1_SRATe = ":SENSe1:{function}:SRATe {n}, {channelList}"
+    GET_SENSe1_SRATe = ":SENSe1:{function}:SRATe? {channelList}"
     GET_SENSe1_SENSe_RANGe_AUTO = ":SENSe1:{function}:SENSe:RANGe:AUTO?"
-    GET_SENSe1_SENSe_RANGe_UPPer = ":SENSe1:{function}:SENSe:RANGe:UPPer? {@<channelList>}"
-    SET_SENSe1_TCouple_RJUNtion_SIMulated = ":SENSe1:{function}:TCouple:RJUNtion:SIMulated {tempValue}, {@<channelList>}"
-    GET_SENSe1_TCouple_RJUNtion_SIMulated = ":SENSe1:{function}:TCouple:RJUNtion:SIMulated? {@<channelList>}"
-    SET_SENSe1_TCouple_RJUNtion_RSELect = ":SENSe1:{function}:TCouple:RJUNtion:RSELect {type}, {@<channelList>}"
-    GET_SENSe1_TCouple_RJUNtion_RSELect = ":SENSe1:{function}:TCouple:RJUNtion:RSELect? {@<channelList>}"
-    SET_SENSe1_TCouple_TYPE = ":SENSe1:{function}:TCouple:TYPE {indentifier}, {@<channelList>}"
-    GET_SENSe1_TCouple_TYPE = ":SENSe1:{function}:TCouple:TYPE? {@<channelList>}"
-    SET_SENSe1_THERmistor = ":SENSe1:{function}:THERmistor {n}, {@<channelList>}"
-    GET_SENSe1_THERmistor = ":SENSe1:{function}:THERmistor? {@<channelList>}"
-    SET_SENSe1_THREshold_RANGe = ":SENSe1:{function}:THREshold:RANGe {n}, {@<channelList>}"
-    GET_SENSe1_THREshold_RANGe = ":SENSe1:{function}:THREshold:RANGe? {@<channelList>}"
-    SET_SENSe1_THREshold_RANGe_AUTO = ":SENSe1:{function}:THREshold:RANGe:AUTO {state}, {@<channelList>}"
-    GET_SENSe1_THREshold_RANGe_AUTO = ":SENSe1:{function}:THREshold:RANGe:AUTO? {@<channelList>}"
-    SET_SENSe1_TRANsducer = ":SENSe1:{function}:TRANsducer {type}, {@<channelList>}"
-    GET_SENSe1_TRANsducer = ":SENSe1:{function}:TRANsducer? {@<channelList>}"
-    SET_SENSe1_UNIT = ":SENSe1:{function}:UNIT {unitOfMeasure}, {@<channelList>}"
-    GET_SENSe1_UNIT = ":SENSe1:{function}:UNIT? {@<channelList>}"
+    GET_SENSe1_SENSe_RANGe_UPPer = ":SENSe1:{function}:SENSe:RANGe:UPPer? {channelList}"
+    SET_SENSe1_TCouple_RJUNtion_SIMulated = ":SENSe1:{function}:TCouple:RJUNtion:SIMulated {tempValue}, {channelList}"
+    GET_SENSe1_TCouple_RJUNtion_SIMulated = ":SENSe1:{function}:TCouple:RJUNtion:SIMulated? {channelList}"
+    SET_SENSe1_TCouple_RJUNtion_RSELect = ":SENSe1:{function}:TCouple:RJUNtion:RSELect {type}, {channelList}"
+    GET_SENSe1_TCouple_RJUNtion_RSELect = ":SENSe1:{function}:TCouple:RJUNtion:RSELect? {channelList}"
+    SET_SENSe1_TCouple_TYPE = ":SENSe1:{function}:TCouple:TYPE {indentifier}, {channelList}"
+    GET_SENSe1_TCouple_TYPE = ":SENSe1:{function}:TCouple:TYPE? {channelList}"
+    SET_SENSe1_THERmistor = ":SENSe1:{function}:THERmistor {n}, {channelList}"
+    GET_SENSe1_THERmistor = ":SENSe1:{function}:THERmistor? {channelList}"
+    SET_SENSe1_THREshold_RANGe = ":SENSe1:{function}:THREshold:RANGe {n}, {channelList}"
+    GET_SENSe1_THREshold_RANGe = ":SENSe1:{function}:THREshold:RANGe? {channelList}"
+    SET_SENSe1_THREshold_RANGe_AUTO = ":SENSe1:{function}:THREshold:RANGe:AUTO {state}, {channelList}"
+    GET_SENSe1_THREshold_RANGe_AUTO = ":SENSe1:{function}:THREshold:RANGe:AUTO? {channelList}"
+    SET_SENSe1_TRANsducer = ":SENSe1:{function}:TRANsducer {type}, {channelList}"
+    GET_SENSe1_TRANsducer = ":SENSe1:{function}:TRANsducer? {channelList}"
+    SET_SENSe1_UNIT = ":SENSe1:{function}:UNIT {unitOfMeasure}, {channelList}"
+    GET_SENSe1_UNIT = ":SENSe1:{function}:UNIT? {channelList}"
     SET_SENSe1_AZERo_ONCE = ":SENSe1:AZERo:ONCE"
     GET_SENSe1_CONFiguration_LIST_CATalog = ":SENSe1:CONFiguration:LIST:CATalog?"
     SET_SENSe1_CONFiguration_LIST_CREate = ":SENSe1:CONFiguration:LIST:CREate {name}"
@@ -332,14 +436,14 @@ class SENSe1(Enum):
     SET_SENSe1_CONFiguration_LIST_RECall = ":SENSe1:CONFiguration:LIST:RECall {name}, {index}"
     GET_SENSe1_CONFiguration_LIST_SIZE = ":SENSe1:CONFiguration:LIST:SIZE? {name}"
     SET_SENSe1_CONFiguration_LIST_STORe = ":SENSe1:CONFiguration:LIST:STORe {name}, {index}"
-    SET_SENSe1_COUNt = ":SENSe1:{function}:COUNt {n}, {@<channelList>}"
-    GET_SENSe1_COUNt = ":SENSe1:{function}:COUNt? {@<channelList>}"
-    SET_SENSe1_DIGitize_COUNt = ":SENSe1:{function}:DIGitize:COUNt {n}, {@<channelList>}"
-    GET_SENSe1_DIGitize_COUNt = ":SENSe1:{function}:DIGitize:COUNt? {@<channelList>}"
-    SET_SENSe1_DIGitize_FUNCtion_ON = ":SENSe1:{function}:DIGitize:FUNCtion:ON {function}, {@<channelList>}"
-    GET_SENSe1_DIGitize_FUNCtion_ON = ":SENSe1:{function}:DIGitize:FUNCtion:ON? {@<channelList>}"
-    SET_SENSe1_FUNCtion_ON = ":SENSe1:{function}:FUNCtion:ON {function}, {@<channelList>}"
-    GET_SENSe1_FUNCtion_ON = ":SENSe1:{function}:FUNCtion:ON? {@<channelList>}"
+    SET_SENSe1_COUNt = ":SENSe1:{function}:COUNt {n}, {channelList}"
+    GET_SENSe1_COUNt = ":SENSe1:{function}:COUNt? {channelList}"
+    SET_SENSe1_DIGitize_COUNt = ":SENSe1:{function}:DIGitize:COUNt {n}, {channelList}"
+    GET_SENSe1_DIGitize_COUNt = ":SENSe1:{function}:DIGitize:COUNt? {channelList}"
+    SET_SENSe1_DIGitize_FUNCtion_ON = ":SENSe1:{function}:DIGitize:FUNCtion:ON {function}, {channelList}"
+    GET_SENSe1_DIGitize_FUNCtion_ON = ":SENSe1:{function}:DIGitize:FUNCtion:ON? {channelList}"
+    SET_SENSe1_FUNCtion_ON = ":SENSe1:{function}:FUNCtion:ON {function}, {channelList}"
+    GET_SENSe1_FUNCtion_ON = ":SENSe1:{function}:FUNCtion:ON? {channelList}"
 
 
 class STATus(Enum):
@@ -405,34 +509,34 @@ class TRACe(Enum):
     """
     The TRACe subsystem contains commands that control the reading buffers.
     """
-    GET_TRACe_ACTual = ":TRACe:ACTual? {bufferName}"
-    GET_TRACe_ACTual_END = ":TRACe:ACTual:END? {bufferName}"
-    GET_TRACe_ACTual_STARt = ":TRACe:ACTual:STARt? {bufferName}"
+    GET_TRACe_ACTual = ":TRACe:ACTual? '{bufferName}'"
+    GET_TRACe_ACTual_END = ":TRACe:ACTual:END? '{bufferName}'"
+    GET_TRACe_ACTual_STARt = ":TRACe:ACTual:STARt? '{bufferName}'"
     SET_TRACe_CHANnel_MATH = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
-    SET_TRACe_CLEAr = ":TRACe:CLEAr {bufferName}"
-    GET_TRACe_DATA = ":TRACe:DATA? {startIndex}, {endIndex}, {bufferName}, {bufferElements}"
-    SET_TRACe_DELete = ":TRACe:DELEte {bufferName}"
-    SET_TRACe_FILL_MODE = ":TRACe:FILL:MODE {fillType}, {bufferName}"
-    GET_TRACe_FILL_MODE = ":TRACe:FILL:MODE? {bufferName}"
-    SET_TRACe_LOG_STATe = ":TRACe:LOG:STATe {state}, {bufferName}"
-    GET_TRACe_LOG_STATe = ":TRACe:LOG:STATe? {bufferName}"
-    SET_TRACe_MAKE = ":TRACe:MAKE {bufferName}, {bufferSize}, {bufferStyle}"
+    SET_TRACe_CLEAr = ":TRACe:CLEAr '{bufferName}'"
+    GET_TRACe_DATA = ":TRACe:DATA? {startIndex}, {endIndex}, '{bufferName}', {bufferElements}"
+    SET_TRACe_DELete = ":TRACe:DELEte '{bufferName}'"
+    SET_TRACe_FILL_MODE = ":TRACe:FILL:MODE {fillType}, '{bufferName}'"
+    GET_TRACe_FILL_MODE = ":TRACe:FILL:MODE? '{bufferName}'"
+    SET_TRACe_LOG_STATe = ":TRACe:LOG:STATe {state}, '{bufferName}'"
+    GET_TRACe_LOG_STATe = ":TRACe:LOG:STATe? '{bufferName}'"
+    SET_TRACe_MAKE = ":TRACe:MAKE '{bufferName}', {bufferSize}, {bufferStyle}"
     SET_TRACe_MATH = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
-    SET_TRACe_POINts = ":TRACe:POINts {newSize}, {bufferName}"
-    GET_TRACe_POINts = ":TRACe:POINts? {bufferName}"
-    SET_TRACe_SAVE = ":TRACe:SAVE {filename}, {bufferName}, {what}, {start}, {end}"
-    SET_TRACe_SAVE_APPend = ":TRACe:SAVE:APPend {filename}, {bufferName}, {timeFormat}, {start}, {end}"
-    GET_TRACe_STATistics_AVERage = ":TRACe:STATistics:AVERage? {bufferName}, {@<channelName>}"
-    SET_TRACe_STATistics_CLEAr = ":TRACe:STATistics:CLEAr {bufferName}"
-    GET_TRACe_STATistics_MAXimum = ":TRACe:STATistics:MAXimum? {bufferName}, {@<channelName>}"
-    GET_TRACe_STATistics_MINimum = ":TRACe:STATistics:MINimum? {bufferName}, {@<channelName>}"
-    GET_TRACe_STATistics_PK2Pk = ":TRACe:STATistics:PK2Pk? {bufferName}, {@<channelName>}"
-    GET_TRACe_STATistics_SPAN = ":TRACe:STATistics:SPAN? {bufferName}, {@<channelName>}"
-    GET_TRACe_STATistics_STDDev = ":TRACe:STATistics:STDDev? {bufferName}, {@<channelName>}"
-    SET_TRACe_TRIGger = ":TRACe:TRIGger {bufferName}"
-    SET_TRACe_TRIGger_DIGitize = ":TRACe:TRIGger:DIGitize {bufferName}"
-    SET_TRACe_UNIT = ":TRACe:UNIT CUSTOM{n}, {unitOfMeasure}, {bufferName}"
-    SET_TRACe_WRITe_FORMat = ":TRACe:WRITe:FORMat {bufferName}, {units}, {displayDigits}, {extraUnits}, {ExtraDigits}"
+    SET_TRACe_POINts = ":TRACe:POINts {newSize}, '{bufferName}'"
+    GET_TRACe_POINts = ":TRACe:POINts? '{bufferName}'"
+    SET_TRACe_SAVE = ":TRACe:SAVE {filename}, '{bufferName}', {what}, {start}, {end}"
+    SET_TRACe_SAVE_APPend = ":TRACe:SAVE:APPend {filename}, '{bufferName}', {timeFormat}, {start}, {end}"
+    GET_TRACe_STATistics_AVERage = ":TRACe:STATistics:AVERage? '{bufferName}', {@<channelName>}"
+    SET_TRACe_STATistics_CLEAr = ":TRACe:STATistics:CLEAr '{bufferName}'"
+    GET_TRACe_STATistics_MAXimum = ":TRACe:STATistics:MAXimum? '{bufferName}', {@<channelName>}"
+    GET_TRACe_STATistics_MINimum = ":TRACe:STATistics:MINimum? '{bufferName}', {@<channelName>}"
+    GET_TRACe_STATistics_PK2Pk = ":TRACe:STATistics:PK2Pk? '{bufferName}', {@<channelName>}"
+    GET_TRACe_STATistics_SPAN = ":TRACe:STATistics:SPAN? '{bufferName}', {@<channelName>}"
+    GET_TRACe_STATistics_STDDev = ":TRACe:STATistics:STDDev? '{bufferName}', {@<channelName>}"
+    SET_TRACe_TRIGger = ":TRACe:TRIGger '{bufferName}'"
+    SET_TRACe_TRIGger_DIGitize = ":TRACe:TRIGger:DIGitize '{bufferName}'"
+    SET_TRACe_UNIT = ":TRACe:UNIT CUSTOM{n}, {unitOfMeasure}, '{bufferName}'"
+    SET_TRACe_WRITe_FORMat = ":TRACe:WRITe:FORMat '{bufferName}', {units}, {displayDigits}, {extraUnits}, {ExtraDigits}"
     SET_TRACe_WRITe_READing = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
 
 
@@ -459,7 +563,7 @@ class TRIGger(Enum):
     SET_TRIGger_BLOCk_BRANch_LIMit_DYNamic = ":TRIGger:BLOCk:BRANch:LIMit:DYNAmic {blockNumber}, {limitType}, {LimitA}, {LimitB}, {branchToBlock}, {measureDigitizeBlock}"
     SET_TRIGger_BLOCk_BRANch_ONCE = ":TRIGger:BLOCk:BRANch:ONCE {blockNumber}, {branchToBlock}"
     SET_TRIGger_BLOCk_BRANch_ONCE_EXCLuded = ":TRIGger:BLOCk:BRANch:ONCE:EXCLuded {blockNumber}, {branchToBlock}"
-    SET_TRIGger_BLOCk_BUFFer_CLEar = ":TRIGger:BLOCk:BUFFer:CLEar {blockNumber}, {bufferName}"
+    SET_TRIGger_BLOCk_BUFFer_CLEar = ":TRIGger:BLOCk:BUFFer:CLEar {blockNumber}, '{bufferName}'"
     SET_TRIGger_BLOCk_CONFig_NEXT = ":TRIGger:BLOCk:CONFig:NEXT {blockNumber}, {configurationList}"
     SET_TRIGger_BLOCk_CONFig_PREVious = ":TRIGger:BLOCk:CONFig:PREvious {blockNumber}, {configurationList}"
     SET_TRIGger_BLOCk_CONFig_RECall = ":TRIGger:BLOCk:CONFig:RECall {blockNumber}, {configurationList}, {index}"
@@ -468,7 +572,7 @@ class TRIGger(Enum):
     SET_TRIGger_BLOCk_DIGital_IO = ":TRIGger:BLOCk:DIGital:IO {blockNumber}, {bitPattern}, {bitMask}"
     GET_TRIGger_BLOCk_LIST = ":TRIGger:BLOCk:LIST?"
     SET_TRIGger_BLOCk_LOG_EVENt = ":TRIGger:BLOCk:LOG:EVENt {blockNumber}, {eventNumber}, {message}"
-    SET_TRIGger_BLOCk_MDIGitize = ":TRIGger:BLOCk:MDIGitize {blockNumber}, {bufferName}, {count}"
+    SET_TRIGger_BLOCk_MDIGitize = ":TRIGger:BLOCk:MDIGitize {blockNumber}, '{bufferName}', {count}"
     SET_TRIGger_BLOCk_NOP = ":TRIGger:BLOCk:NOP {blockNumber}"
     SET_TRIGger_BLOCk_NOTify = ":TRIGger:BLOCk:NOTify {blockNumber}, {notifyID}"
     SET_TRIGger_BLOCk_WAIT = ":TRIGger:BLOCk:WAIT {blockNumber}, {event}, {clear}, {logic}, {event}, {event}"
@@ -506,13 +610,13 @@ class TRIGger(Enum):
     GET_TRIGger_LAN_OUT_PROTocol = ":TRIGger:LAN{n}:OUT:PROTocol?"
     SET_TRIGger_LAN_OUT_STIMulus = ":TRIGger:LAN{n}:OUT:STIMulus {LANevent}"
     GET_TRIGger_LAN_OUT_STIMulus = ":TRIGger:LAN{n}:OUT:STIMulus?"
-    SET_TRIGger_LOAD_ConfigList = ":TRIGger:LOAD 'ConfigList', {measureConfigList}, {delay}, {bufferName}"
+    SET_TRIGger_LOAD_ConfigList = ":TRIGger:LOAD 'ConfigList', {measureConfigList}, {delay}, '{bufferName}'"
     SET_TRIGger_LOAD_DurationLoop = ":TRIGger:LOAD 'DurationLoop', {duration}, {delay}, {readingBuffer}"
     SET_TRIGger_LOAD_Empty = ":TRIGger:LOAD 'EMPTY'"
     SET_TRIGger_LOAD_GradeBinning = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
-    SET_TRIGger_LOAD_LogicTrigger = ":TRIGger:LOAD 'LogicTrigger', {digInLine}, {digOutLine}, {count}, {clear}, {delay}, {bufferName}"
-    SET_TRIGger_LOAD_LoopUntilEvent = ":TRIGger:LOAD 'LoopUntilEvent', {eventConstant}, {position}, {clear}, {delay}, {bufferName}"
-    SET_TRIGger_LOAD_SimpleLoop = ":TRIGger:LOAD 'SimpleLoop', {count}, {delay}, {bufferName}"
+    SET_TRIGger_LOAD_LogicTrigger = ":TRIGger:LOAD 'LogicTrigger', {digInLine}, {digOutLine}, {count}, {clear}, {delay}, '{bufferName}'"
+    SET_TRIGger_LOAD_LoopUntilEvent = ":TRIGger:LOAD 'LoopUntilEvent', {eventConstant}, {position}, {clear}, {delay}, '{bufferName}'"
+    SET_TRIGger_LOAD_SimpleLoop = ":TRIGger:LOAD 'SimpleLoop', {count}, {delay}, '{bufferName}'"
     SET_TRIGger_LOAD_SortBinning = None  # This CMD need special configuration to it parameter, so I will split it into smaller functions for easier approach
     SET_TRIGger_PAUSe = ":TRIGger:PAUSe"
     SET_TRIGger_RESume = ":TRIGger:RESume"
@@ -538,10 +642,23 @@ class TRIGger(Enum):
 class DMM6500_V1(VISA_INSTRUMENT):
     def __init__(self, visa_port=None, connection_type=None):
         super().__init__(visa_port, connection_type)
-        self.controller._connection.timeout = 60000
+        self.scanner_card = False
+        # self.controller._connection.timeout = 60000
+
+    def cmd_formatter(self, command: str):
+        if self.scanner_card:
+            return command
+        else:
+            if not "?" in command:
+                # Replace the unwanted part
+                cleaned_command = re.sub(r", {channelList}", "", command)
+                return cleaned_command
+            elif "?" in command:
+                cleaned_command = re.sub(r" {channelList}", "", command)
+                return cleaned_command
 
     def rcl(self,
-            user_setup=USER_SETUP.SETUP_0) -> None:
+            user_setup=USER_SETUP.SETUP_0.value) -> None:
         """
         Brief:
             -   This command returns the instrument to the setup that was saved with the *SAV command.
@@ -559,7 +676,7 @@ class DMM6500_V1(VISA_INSTRUMENT):
         self.write(command=cmd)
 
     def sav(self,
-            user_setup=USER_SETUP.SETUP_0) -> None:
+            user_setup=USER_SETUP.SETUP_1.value) -> None:
         """
         Brief:
             -   Save the present instrument settings as a user-saved setup.
@@ -623,7 +740,7 @@ class DMM6500_V1(VISA_INSTRUMENT):
         return self.query(command=cmd)
 
     def measure_with(self,
-                     function=FUNCTION.VOLT_DC,
+                     function=FUNCTION.VOLT_DC.value,
                      buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
                      buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
         """
@@ -670,7 +787,7 @@ class DMM6500_V1(VISA_INSTRUMENT):
         return self.query(command=cmd)
 
     def measure_digitize_with(self,
-                              function=DIGITIZE_FUNCTION.VOLT,
+                              function=DIGITIZE_FUNCTION.VOLT.value,
                               buffer_name=DEFAULT_SETUP.DEFBUFFER1.value,
                               buffer_elements=BUFFER_ELEMENTS.READing.value) -> str:
         """
@@ -725,6 +842,99 @@ class DMM6500_V1(VISA_INSTRUMENT):
         cmd = ROOT.GET_READ_DIGITIZE.value.format(bufferName=buffer_name,
                                                   bufferElements=buffer_elements)
         return self.query(command=cmd)
+
+    def set_range(self, function: str = None,
+                  n: str = None,
+                  channelList="{channelList}"):
+        range_cmd = self.cmd_formatter(SENSe1.SET_SENSe1_RANGe_UPPer.value.format(function=function,
+                                                                                  n=n,
+                                                                                  channelList=channelList))
+        self.write(range_cmd)
+
+    # -----------------------------------------------------------------------------------------------------------------
+    def load_trigger(self, **kwargs):
+        mode = kwargs["mode"]
+        cmd = None
+        if mode.lower() == "empty":
+            cmd = TRIGger.SET_TRIGger_LOAD_Empty.value
+
+        self.write(command=cmd)
+
+    def set_trigger_block_buffer_clear(self,
+                                       blockNumber=0,
+                                       bufferName="defbuffer1"):
+        cmd = self.cmd_formatter(TRIGger.SET_TRIGger_BLOCk_BUFFer_CLEar.value.format(blockNumber=blockNumber,
+                                                                                     bufferName=bufferName))
+        self.write(cmd)
+
+    def set_trigger_block_delay_constant(self,
+                                         blockNumber=0,
+                                         time=RANGE.TIME_1ms.value):
+        cmd = self.cmd_formatter(TRIGger.SET_TRIGger_BLOCk_DELay_CONStant.value.format(blockNumber=blockNumber,
+                                                                                       time=time))
+        self.write(cmd)
+
+    def set_trigger_block_mdigitize(self,
+                                    blockNumber=0,
+                                    bufferName="defbuffer1",
+                                    count=0):
+        cmd = self.cmd_formatter(TRIGger.SET_TRIGger_BLOCk_MDIGitize.value.format(blockNumber=blockNumber,
+                                                                                  bufferName=bufferName,
+                                                                                  count=count))
+        self.write(cmd)
+
+    def set_trigger_block_branch_limit_constant(self,
+                                                blockNumber=0,
+                                                limitType="ABOVe",
+                                                LimitA=0.0,
+                                                LimitB=0.0,
+                                                branchToBlock=0,
+                                                measureDigitizeBlock=0):
+
+        cmd = self.cmd_formatter(TRIGger.SET_TRIGger_BLOCk_BRANch_LIMit_CONStant.value.format(blockNumber=blockNumber,
+                                                                                              limitType=limitType,
+                                                                                              LimitA=LimitA,
+                                                                                              LimitB=LimitB,
+                                                                                              branchToBlock=branchToBlock,
+                                                                                              measureDigitizeBlock=measureDigitizeBlock))
+        self.write(cmd)
+
+    def init(self):
+        self.write(ROUTe.SET_INITiate_IMMediate.value)
+
+    # -----------------------------------------------------------------------------------------------------------------
+
+    def set_trigger_external_in_clear(self):
+        cmd = TRIGger.SET_TRIGger_EXTernal_IN_CLEar.value
+        self.write(command=cmd)
+
+    def set_trigger_external_in_edge(self, edgeType=EDGE_TYPE.FALLing.value):
+        cmd = TRIGger.SET_TRIGger_EXTernal_IN_EDGE.value.format(detectedEdge=edgeType)
+        self.write(command=cmd)
+
+    def get_trigger_external_in_edge(self):
+        cmd = TRIGger.GET_TRIGger_EXTernal_IN_EDGE.value
+        return self.query(command=cmd)
+
+    def get_trigger_external_in_overrun(self):
+        cmd = TRIGger.GET_TRIGger_EXTernal_IN_OVERrun.value
+        return self.query(command=cmd)
+
+    def set_trigger_external_out_logic(self, logicType=TTL.NEGative.value):
+        cmd = TRIGger.SET_TRIGger_EXTernal_OUT_LOGic.value.format(logicType=logicType)
+        self.write(command=cmd)
+
+    def get_trigger_external_out_logic(self):
+        cmd = TRIGger.GET_TRIGger_EXTernal_OUT_LOGic.value
+        return self.query(command=cmd)
+
+    def set_trigger_external_out_stimulus(self, event=EVENT.NONE.value):
+        cmd = TRIGger.SET_TRIGger_EXTernal_OUT_STIMulus.value.format(event=event)
+        self.write(command=cmd)
+
+    def get_trigger_external_out_stimulus(self):
+        cmd = TRIGger.GET_TRIGger_EXTernal_OUT_STIMulus.value
+        return self.query(cmd)
 
 
 """
@@ -834,60 +1044,70 @@ class UNITTEST:
         self.dmm = DMM6500_V1(visa_port=visa_port, connection_type=connection_type)
 
     def ieee488_2_common_commands(self):
-        self.dmm.cc_cls()
-        self.dmm.cc_ese()
-        self.dmm.cc_opc()
+        self.dmm.controller.cc_cls()
+        self.dmm.controller.cc_ese()
+        self.dmm.controller.cc_opc()
 
     def method_test(self):
-        self.dmm.rcl()
-        self.dmm.sav()
-        self.dmm.fetch()
-        self.dmm.measure()
-        self.dmm.measure_with()
-        self.dmm.measure_digitize()
-        self.dmm.read()
-        self.dmm.read_digitize()
+        # self.dmm.sav()
+        # self.dmm.rcl()
+        print(self.dmm.measure())
+        # print(self.dmm.measure_with())
+        # print(self.dmm.read())
+        print(self.dmm.fetch())
 
+        # print(self.dmm.measure_digitize_with())
+        # print(self.dmm.read_digitize())
+
+    def trigger_mode(self):
+        self.dmm.set_range(function=FUNCTION.VOLT_DC.VOLT_DC.value,
+                           n=RANGE.DC_10V.value)
+        self.dmm.load_trigger(mode="empty")
+        self.dmm.set_trigger_block_buffer_clear(blockNumber=1)
+        self.dmm.set_trigger_block_delay_constant(blockNumber=2, time=RANGE.TIME_1ms.value)
+        self.dmm.set_trigger_block_mdigitize(blockNumber=3, count=1)
+        self.dmm.set_trigger_block_branch_limit_constant(blockNumber=4,
+                                                         limitType="ABOVe",
+                                                         LimitA=0,
+                                                         LimitB=3.0,
+                                                         branchToBlock=1,
+                                                         measureDigitizeBlock=3
+                                                         )
+        self.dmm.set_trigger_block_mdigitize(blockNumber=5, count=1)
+        self.dmm.set_trigger_block_branch_limit_constant(blockNumber=6,
+                                                         limitType="BELow",
+                                                         LimitA=1.8,
+                                                         LimitB=0,
+                                                         branchToBlock=0,
+                                                         measureDigitizeBlock=5
+                                                         )
+        self.dmm.init()
+
+    def get_data_from_trigger_model(self):
+        while True:
+            data = self.dmm.query(':TRIGger:STATe?')
+            print(data)  # "IDLE;IDLE;6"
+            results = data.split(sep=';')
+            if results[0] == "IDLE" and results[1] == "IDLE" and results[2] == "6":
+                return round(float(self.dmm.fetch()), 3)
+            time.sleep(0.001)
+
+    def trigger_in_out_test(self):
+        self.dmm.set_trigger_external_in_clear()
+        self.dmm.set_trigger_external_out_logic(logicType=TTL.NEGative.value)
+        self.dmm.set_trigger_external_out_stimulus(event=EVENT.COMMand.value)
+
+        print("Before trigger")
+        self.dmm.write(ROOT.SET_TRIG.value)
+        print("After trigger")
 
 if __name__ == "__main__":
-    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_0.value))
-    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_1.value))
-    print(ROOT.SET_RCL.value.format(setup=USER_SETUP.SETUP_2.value))
-    # print(USER_SETUP._value2member_map_)
-    # print(ROOT.RCL.value.format(setup=USER_SETUP.SETUP_0.value))
-    # print(f"{ROOT.RCL.value} {USER_SETUP.SETUP_0.value}")
+    scanner = PyVISAScanner()
+    connect_type, port = scanner.scan_for_instruments(expected_id="DMM6500")
 
-    # scanner = PyVISAScanner()
-    # connect_type, port = scanner.scan_for_instruments(expected_id="DMM6500")
-    #
-    # instr = DMM6500(visa_port=port, connection_type=connect_type)
-    #
-    # cycle = 1000
-    # for i in range(cycle):
-    #     instr.trigger_mode()
-    #     result = instr.get_data_from_trigger_model()
-    #     print(f"Lasted value: {result}")
-    #     if result > 1.6:
-    #         print(f"Failed at {i}")
-    #
-    #         break
-    #     time.sleep(1)
-    # print(f"Finish {cycle} cycle")
-    # instr.clear_trigger()
+    instr = UNITTEST(visa_port=port, connection_type=connect_type)
 
-    # dcv = instr.meas_vdc()
-    # print(f'Measured Voltage: {dcv}')
-    # print(f'Fetch buffer: {instr.fetch()}')
-    #
-    # idc = instr.meas_idc()
-    # print(f'Measured Current: {idc}')
-    # print(f'Fetch buffer: {instr.fetch()}')
+    instr.trigger_mode()
+    print(instr.get_data_from_trigger_model())
 
-    # acv = instr.meas_vac()
-    # print(f'Measured Voltage: {acv}')
-
-    # resistance_2w = instr.meas_2w()
-    # print(f'Measured Resistance: {resistance_2w}')
-    # print(f'Fetch buffer: {instr.fetch()}')
-
-    # instr.close()
+    # instr.trigger_in_out_test()

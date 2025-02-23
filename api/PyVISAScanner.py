@@ -1,7 +1,7 @@
 import pyvisa
 import re
-from SCPI.controller.SERIAL import SERIAL_Controller
-from SCPI.controller.TCPIP import TCPIP_Controller
+from controller.SERIAL import SERIAL_Controller
+from controller.TCPIP import TCPIP_Controller
 
 
 
